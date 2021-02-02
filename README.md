@@ -6,8 +6,8 @@ The wind has a significant impact on the stability and manoeuvrability of UAVs a
 Le vent a un impact important sur la stabilité et la manoeuvrabilité des UAV et egaement des parachute. Dans le cadre du développement de systèmes de contrôle du vol de colis aéro-largués et auto-guidés une bonne modélisation du vent est nécessaire.
 
 Directories:
- [//]: <> (* autotest    -> testing suite)
- [//]: <> (* cmake       -> cmake support scripts)
+<!-- * autotest    -> testing suite -->
+<!-- * cmake       -> cmake support scripts -->
  * data        -> testing data
  * doc         -> documentation
  * images      -> splash image and icons for gui

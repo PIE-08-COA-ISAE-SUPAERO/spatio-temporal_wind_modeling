@@ -1,14 +1,13 @@
-Spatio-Temporal Wind Modeling
+Spatio-Temporal Wind Modeling Parafoil Simulations and Control
 =========
-[![Build Status](https://travis-ci.org/firelab/windninja.svg?branch=master)](https://travis-ci.org/firelab/windninja)
-[![builds.sr.ht status](https://builds.sr.ht/~ksshannon/windninja.svg)](https://builds.sr.ht/~ksshannon/windninja?)
-[![DOI](https://zenodo.org/badge/21244/firelab/windninja.svg)](https://zenodo.org/badge/latestdoi/21244/firelab/windninja)
 
-WindNinja is a diagnostic wind model developed for use in wildland fire modeling.
+The wind has a significant impact on the stability and manoeuvrability of UAVs and also parachutes. Based on the UAV modleing byKenan Cole and Adam Wickenheiser, this project aims to implement an enhanced parafoil flight me-chanics simulator.
+
+Le vent a un impact important sur la stabilité et la manoeuvrabilité des UAV et egaement des parachute. Dans le cadre du développement de systèmes de contrôle du vol de colis aéro-largués et auto-guidés une bonne modélisation du vent est nécessaire.
 
 Directories:
- * autotest    -> testing suite
- * cmake       -> cmake support scripts
+ [//]: <> (* autotest    -> testing suite)
+ [//]: <> (* cmake       -> cmake support scripts)
  * data        -> testing data
  * doc         -> documentation
  * images      -> splash image and icons for gui
@@ -17,10 +16,6 @@ Directories:
 Dependencies (versions are versions we build against):
  * WindNinja
     * [Building on Windows](https://github.com/firelab/windninja/wiki/Building-WindNinja-on-Windows-using-the-MSVC-compiler-and-gisinternals.com-dependencies)
-
-    * boost_date_time
-    * boost_program_options
-    * boost_test
  * [pyGrib](https://github.com/jswhit/pygrib)
 
 See INSTALL for more information (coming soon)
@@ -28,6 +23,10 @@ See INSTALL for more information (coming soon)
 See CREDITS for authors
 
 See NEWS for release information
+
+Quickstart
+==========
+
 
 =========
 <img src="images/bsb.jpg" alt="Example output"  />

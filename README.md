@@ -14,7 +14,7 @@ Directories:
  * src         -> source files
 
 Dependencies (versions are versions we build against):
- * WindNinja
+ * [WindNinja](https://github.com/firelab/windninja)
     * [Building on Windows](https://github.com/firelab/windninja/wiki/Building-WindNinja-on-Windows-using-the-MSVC-compiler-and-gisinternals.com-dependencies)
  * [pyGrib](https://github.com/jswhit/pygrib)
 

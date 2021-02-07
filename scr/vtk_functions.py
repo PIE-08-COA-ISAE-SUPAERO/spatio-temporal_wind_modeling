@@ -32,4 +32,4 @@ def main(filename_wind , filename_surf):
     
     mesh = meshio.read(filename_wind)
     surface = meshio.read(filename_surf)
-    return np.array(mesh.points),np.array(mesh.point_data['wind_vectors']),np.array(surface.points[:,2])
+    return np.array(mesh.points),np.array(mesh.point_data['wind_vectors']),np.array(surface.points)

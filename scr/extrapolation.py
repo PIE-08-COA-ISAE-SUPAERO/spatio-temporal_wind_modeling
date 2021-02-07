@@ -225,9 +225,9 @@ def main(points,wind,points_surf,elev_max, step):
     -------
     extrap_field : Narray of floats
         Contains the extrapolated wind field in format (x,y,z,U,V,W).
-    Z_surf : Narray of floats
-        Array containing the altitude of the ground surface for each of the 
-        (x,y,z) point of extrap_field.
+    Z_surf : Narray of floats 
+        Gridded Array containing the altitude of the ground surface for each 
+        of the (x,y) point of extrap_field.
 
     """    
     # Decomposition along the axes

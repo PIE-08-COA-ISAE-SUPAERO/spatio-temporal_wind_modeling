@@ -8,6 +8,7 @@ Ninja's data and to extrapolate them to the required altitudes.
 """
 import numpy as np
 import scipy.optimize as opt
+import scipy.interpolate as intp
 
 
 def get_Zlist_pos(x_pos,y_pos,points):
@@ -84,7 +85,7 @@ def alt_to_elev(points_surf,points_wind):
         # Retrieving the altitude of the surface and the measurement points of
         # current ground position.
         Zwind_argpos, Zwind_pos = get_Zlist_pos(x,y,points_wind)
-        Zsurf_pos = get_Zlist_pos(x,y,points_surf)[1]
+        Zsurf_pos = np.unique(get_Zlist_pos(x,y,points_surf)[1])
         
         # Calculating the elevation from the surface of each measurement point.
         for i in range(len(Zwind_argpos)):
@@ -225,9 +226,9 @@ def main(points,wind,points_surf,elev_max, step):
     -------
     extrap_field : Narray of floats
         Contains the extrapolated wind field in format (x,y,z,U,V,W).
-    Z_surf : Narray of floats 
-        Gridded Array containing the altitude of the ground surface for each 
-        of the (x,y) point of extrap_field.
+    Z_surf : Narray of floats
+        Array containing the altitude of the ground surface for each of the 
+        (x,y,z) point of extrap_field.
 
     """    
     # Decomposition along the axes
@@ -244,6 +245,9 @@ def main(points,wind,points_surf,elev_max, step):
     # Mesh
     X_tick = np.unique(X)
     Y_tick = np.unique(Y)
+    Z_tick = get_Zlist_pos(X_tick[0], Y_tick[0], points)[1]
+    Z_tick = np.extract(Z_tick>=0, Z_tick)
+    Z_tick = np.round(Z_tick)
     
     # Wind field for each component
     U_field = np.array([X,Y,elev_wind[:,2],U])
@@ -255,8 +259,6 @@ def main(points,wind,points_surf,elev_max, step):
     W_field = np.array([X,Y,elev_wind[:,2],W])
     W_field = np.transpose(W_field)
     
-    Z_surf  = np.zeros((len(Y_tick),len(X_tick)))
-    
     # Extrapolation array
     X_extrap = []
     Y_extrap = []
@@ -264,6 +266,7 @@ def main(points,wind,points_surf,elev_max, step):
     U_extrap = []
     V_extrap = []
     W_extrap = []
+    Z_surf = []
     
     # For each point of the mesh
     for i in range(len(X_tick)):
@@ -280,33 +283,47 @@ def main(points,wind,points_surf,elev_max, step):
             V_pos = get_vert_profile(x_pos,y_pos,V_field)[1]
             W_pos = get_vert_profile(x_pos,y_pos,W_field)[1]
             
+            # Interpolation over Z_tick to have a regular mesh over z-axis
+            Ucalc = intp.interp1d(z_pos,U_pos, bounds_error = False, 
+                                  fill_value='extrapolate')
+            Vcalc = intp.interp1d(z_pos,V_pos, bounds_error = False, 
+                                  fill_value='extrapolate')
+            Wcalc = intp.interp1d(z_pos,W_pos, bounds_error = False, 
+                                  fill_value='extrapolate')
+            
+            U_pos = Ucalc(Z_tick)
+            V_pos = Vcalc(Z_tick)
+            W_pos = Wcalc(Z_tick)
+            
             # Adding the coordinates of the current point
-            X_extrap = np.append(X_extrap,np.ones(len(z_pos))*x_pos)
-            Y_extrap = np.append(Y_extrap,np.ones(len(z_pos))*y_pos)
-            Z_extrap = np.append(Z_extrap,z_pos + z_surf)  # In altitude conv
+            X_extrap = np.append(X_extrap,np.ones(len(Z_tick))*x_pos)
+            Y_extrap = np.append(Y_extrap,np.ones(len(Z_tick))*y_pos)
+            Z_extrap = np.append(Z_extrap,Z_tick)  # In altitude conv
+            
+            Z_surf = np.append(Z_surf,np.ones(len(Z_tick))*z_surf)
             
             # Adding the data points of the initial fields
             U_extrap = np.append(U_extrap,U_pos)
             V_extrap = np.append(V_extrap,V_pos)
             W_extrap = np.append(W_extrap,W_pos)
             
-            Z_surf[j,i] = z_surf
-            
             # Extrapolation of the different fields
-            Z_pos_extrap = np.arange(z_pos[-1],elev_max,step)
-            param_pow = get_extrap_law(z_pos,U_pos,power_law)[2]
+            Z_pos_extrap = np.linspace(Z_tick[-1],elev_max,step)
+            param_pow = get_extrap_law(Z_tick,U_pos,power_law)[2]
             U_pos_extrap = power_law(Z_pos_extrap,param_pow[0], param_pow[1])
             
-            param_pow = get_extrap_law(z_pos,V_pos,power_law)[2]
+            param_pow = get_extrap_law(Z_tick,V_pos,power_law)[2]
             V_pos_extrap = power_law(Z_pos_extrap,param_pow[0], param_pow[1])
             
-            param_pow = get_extrap_law(z_pos,W_pos,power_law)[2]
+            param_pow = get_extrap_law(Z_tick,W_pos,power_law)[2]
             W_pos_extrap = power_law(Z_pos_extrap,param_pow[0], param_pow[1])
             
             # Adding the coordinates of the extrapolated points
             X_extrap = np.append(X_extrap,np.ones(len(Z_pos_extrap))*x_pos)
             Y_extrap = np.append(Y_extrap,np.ones(len(Z_pos_extrap))*y_pos)
-            Z_extrap = np.append(Z_extrap, Z_pos_extrap + z_surf)
+            Z_extrap = np.append(Z_extrap, Z_pos_extrap)
+            
+            Z_surf = np.append(Z_surf,np.ones(len(Z_pos_extrap))*z_surf)
             
             # Adding the extrapolated points
             U_extrap = np.append(U_extrap,U_pos_extrap)
@@ -315,12 +332,12 @@ def main(points,wind,points_surf,elev_max, step):
               
     # Creation of the extrapolated field
     extrap_field = np.array([X_extrap, Y_extrap, Z_extrap, U_extrap, 
-                                   V_extrap, W_extrap])
+                                   V_extrap, W_extrap, Z_surf])
     
     # Transposition into a vertical array
     extrap_field = np.transpose(extrap_field)
     
-    return extrap_field, Z_surf
+    return extrap_field
 
 def power_law(z,U10,alpha):
     """Power law.

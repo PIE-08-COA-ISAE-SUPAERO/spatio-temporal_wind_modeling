@@ -3,8 +3,7 @@
 Created on Wed Feb 10 11:54:39 2021
 
 @author: Sébastien
-VERSION NON DEFINITIVE POUR CLASSE :
-    - non prise en compte de l'hypothèse de Taylor
+Do not consider the Taylor hypothesis
 """
 
 import numpy as np
@@ -12,8 +11,7 @@ import matplotlib.pyplot as plt
 import numpy.random as rd
 import time
 
-#%% FONCTIONS AUXILIAIRES (spectre, directions principales)
-
+#%% AUXILIARY
 
 def spectre_prin(frequency, speed, altitude):
     
@@ -86,9 +84,7 @@ def spectre_w(frequency, speed, altitude):
     
     return(S)
 
-
-
-#%% FONCTION DE PROFIL TURBULENT
+#%% PRINCIPAL FUNCTIONS
 
 def turbulence(self, latitude, longitude, altitude, time):
     

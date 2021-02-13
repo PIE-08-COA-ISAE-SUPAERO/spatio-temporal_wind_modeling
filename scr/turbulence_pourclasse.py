@@ -4,7 +4,6 @@ Created on Wed Feb 10 11:54:39 2021
 
 @author: Sébastien
 VERSION NON DEFINITIVE POUR CLASSE :
-    - j'enlèverai les exemples et rajouterai les self
     - non prise en compte de l'hypothèse de Taylor
 """
 
@@ -42,6 +41,22 @@ def spectre_prin(frequency, speed, altitude):
 
 def spectre_late(frequency, speed, altitude):
     
+    """
+    Return the DSP of the lateral wind speed
+    Parameters
+    ----------
+    frequency : double
+         The frequency of the component expected.
+    speed : double
+         The stationnary speed of the wind at the point wanted.
+    altitude : double
+         The altitude of the point wanted.  
+    Returns
+    -------
+    S : double 
+         The value of the DSP for these parameters
+    """
+    
     lv = altitude/((0.177+0.00823*altitude)**(1.2))
     S = 4*lv/speed * (1 + 188.4*(2*frequency*lv/speed)**2)/((1 + 70.7*(2*frequency*lv/speed)**2)**(11/6))
     
@@ -49,6 +64,22 @@ def spectre_late(frequency, speed, altitude):
 
 
 def spectre_w(frequency, speed, altitude):
+    
+    """
+    Return the DSP of the vertical wind speed
+    Parameters
+    ----------
+    frequency : double
+         The frequency of the component expected.
+    speed : double
+         The stationnary speed of the wind at the point wanted.
+    altitude : double
+         The altitude of the point wanted.  
+    Returns
+    -------
+    S : double 
+         The value of the DSP for these parameters
+    """
     
     lw = altitude
     S = 4*lw/speed * (1 + 188.4*(2*frequency*lw/speed)**2)/((1 + 70.7*(2*frequency*lw/speed)**2)**(11/6))
@@ -59,7 +90,7 @@ def spectre_w(frequency, speed, altitude):
 
 #%% FONCTION DE PROFIL TURBULENT
 
-def turbulence(latitude, longitude, altitude, time):
+def turbulence(self, latitude, longitude, altitude, time):
     
     """
     Return the wind parameters at the specific position requested with a random turbulence component
@@ -90,14 +121,9 @@ def turbulence(latitude, longitude, altitude, time):
               The direction the wind came from, in ° 
     """
     
-    # Attention, time est un délai relatif à la mesure stationnaire de Windninja, pas une heure absolue.
-    #u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(self, \
-    #                                            latitude, longitude, altitude)
-    # u, v, w, wind_speed, wind_speed_flat, direction = 10, 5, 1, np.sqrt(10**2 \
-    #             + 5**2 + 1), np.sqrt(10**2 + 5**2), np.arctan(5/10)*180/np.pi
-    u, v, w, wind_speed, wind_speed_flat, direction = 20, 0, 0, 20, 20, 0
-    altitude = 70
-    
+    u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(self, \
+                                                latitude, longitude, altitude)
+
     fs = 10 # frequence sampling
     N = int(time * fs) # Max number of modes
     
@@ -134,7 +160,7 @@ def turbulence(latitude, longitude, altitude, time):
     return(u, v, w, magnitude, magnitude_plan, direction)
 
 
-def profil_turbulence(latitude, longitude, altitude, timestep):
+def profil_turbulence(self, latitude, longitude, altitude, timestep):
     
     """
     Return the evolution of the speed of the wind at a specific point during 15 minutes
@@ -165,15 +191,11 @@ def profil_turbulence(latitude, longitude, altitude, timestep):
               The evolution of the vertical wind speed 
     """
     
-    # Attention, time est un délai relatif à la mesure stationnaire de Windninja, pas une heure absolue.
-    #u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(self, \
-    #                                            latitude, longitude, altitude)
-    u, v, w = 15, 5, 2
-    wind_speed, wind_speed_flat, direction = np.sqrt(u**2 + v**2 + w**2), np.sqrt(u**2 + v**2), np.arctan(v/u)*180/np.pi
-    #u, v, w, wind_speed, wind_speed_flat, direction = 20, 0, 0, 20, 20, 0
-    
+    u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(self, \
+                                                latitude, longitude, altitude)
+ 
     fs = 1/timestep # frequence sampling
-    TEMPS_MAX = 900 # observation of the profile during 15 minutes
+    TEMPS_MAX = 600 # observation of the profile during 15 minutes
     N = int(TEMPS_MAX * fs) # Max number of modes
     
     # Table of random Fourier coefficients
@@ -247,11 +269,3 @@ def profil_turbulence(latitude, longitude, altitude, timestep):
     
     # Output as the data computed for prediction
     return(list_time, list_prin, list_late, list_u, list_v, list_w)
-
-t1 = time.time()
-turbulence(1, 1, 70, 100)
-t2 = time.time()
-list_time, list_prin, list_late, list_u, list_v, list_w = profil_turbulence(1, 1, 70, 0.1)
-t3 = time.time()
-print(t2-t1, t3-t2)
-print("u,v,w", np.mean(list_u), np.mean(list_v), np.mean(list_w), "U, vp", np.mean(list_prin), np.mean(list_late))

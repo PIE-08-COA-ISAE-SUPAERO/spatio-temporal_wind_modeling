@@ -14,15 +14,15 @@ from scipy.interpolate import LinearNDInterpolator
 import extrapolation as interp
 
 #%% Récupération fichier texte
-data = np.loadtxt('extrap_field.txt')
+#data = np.loadtxt('extrap_field.txt')
 
 #Récupération du maillage horizontal
-X = data[:,0]
-Y = data[:,1]
-Z_surf = data[:,6]
-X_tick = np.unique(X)
-Y_tick = np.unique(Y)
-Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
+#X = data[:,0]
+#Y = data[:,1]
+#Z_surf = data[:,6]
+#X_tick = np.unique(X)
+#Y_tick = np.unique(Y)
+#Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
 
 #%% Cube de vent
 
@@ -240,7 +240,7 @@ def get_interp_data(xlim, ylim, zlim, surf):
 
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp
 
-def plot_wind_cube(xlim, ylim, zlim, plot):
+def plot_wind_cube(wind_cube, xlim, ylim, zlim, plot):
     """
     
     Calculates a wind_cube inside the wind_cube and plots it if needed.
@@ -290,7 +290,7 @@ def plot_wind_cube(xlim, ylim, zlim, plot):
         
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp
 
-def plot_wind_surface(axis, coord, alt, plot):
+def plot_wind_surface(wind_cube, axis, coord, alt, plot):
     """
     
     Calculates a wind profile or a wind surface from the wind_cube.
@@ -442,10 +442,10 @@ def plot_wind_surface(axis, coord, alt, plot):
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp
 
 #%% Test
-xlim = np.array([X_tick[0], X_tick[-1]])
-ylim = np.array([Y_tick[0], Y_tick[-1]])
-zlim = np.array([Z_tick[0], Z_tick[-1]])
+#xlim = np.array([X_tick[0], X_tick[-1]])
+#ylim = np.array([Y_tick[0], Y_tick[-1]])
+#zlim = np.array([Z_tick[0], Z_tick[-1]])
 
 #X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = plot_wind_cube(xlim, ylim, zlim, True)
 
-X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp = plot_wind_surface("z", [X_tick[0], Y_tick[0]], 1400, True)
+#X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp = plot_wind_surface("z", [X_tick[0], Y_tick[0]], 1400, True)

@@ -5,3 +5,4 @@
 - Quentin Abeille
 - Sebastien Laigret
 - Loic Roux
+- moi

@@ -20,9 +20,20 @@ import vtk_functions as vtk
 import extrapolation 
 import plots
 
-## Global variable
-R_terre = 6371 #Rayon en km de la terre
+#%% Global variable
+R_terre = 6371 #Earth radius (km)
 
+#Some variable for turbulence
+A_Z = 0.177
+B_Z = 0.00823
+C_Z = 1.2
+
+PENTE_PRIN = 5/6
+D_PRIN = 70.7
+PENTE_LATW = 11/6
+D_LATW = 188.4
+
+#%% The class
 class wind:
      
      def __init__(self):
@@ -374,7 +385,8 @@ class wind:
                     The direction the wind came from, in ° 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(latitude, \
+                                                                           longitude, altitude)
 
           fs = 10 # frequence sampling
           N = int(time * fs) # Max number of modes
@@ -402,11 +414,13 @@ class wind:
           # Deviation with regards the principal axis
           magnitude = np.sqrt(wind_prin**2 + wind_late**2 + wind_w**2)
           magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)
-          direction_prin = np.arctan(wind_late/wind_prin)*180/np.pi
+          direction_prin = np.arcsin(wind_late/magnitude_plan)*180/np.pi
+          if wind_prin < 0 :
+               direction_prin = 180 - direction_prin
                                    
-          direction = direction + direction_prin
-          u = magnitude_plan * np.cos(direction * np.pi/180)
-          v = magnitude_plan * np.sin(direction * np.pi/180)
+          direction = direction - direction_prin
+          u = magnitude_plan * np.sin(direction * np.pi/180)
+          v = magnitude_plan * np.cos(direction * np.pi/180)
           w = wind_w    
           
           return(u, v, w, magnitude, magnitude_plan, direction)
@@ -442,10 +456,11 @@ class wind:
                     The evolution of the vertical wind speed 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(self, \
+                                                       latitude, longitude, altitude)
           
           fs = 1/timestep # frequence sampling
-          TEMPS_MAX = 600 # observation of the profile during 15 minutes
+          TEMPS_MAX = 900 # observation of the profile during 15 minutes
           N = int(TEMPS_MAX * fs) # Max number of modes
           
           # Table of random Fourier coefficients
@@ -490,10 +505,13 @@ class wind:
                list_late.append(wind_late)
                list_w.append(wind_w)
                magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)
-               direction_prin = np.arctan(wind_late/wind_prin)*180/np.pi
-               direction_new = direction + direction_prin
-               u = magnitude_plan * np.cos(direction_new * np.pi/180)
-               v = magnitude_plan * np.sin(direction_new * np.pi/180)
+               direction_prin = np.arcsin(wind_late/magnitude_plan)*180/np.pi
+               if wind_prin < 0 :
+                    direction_prin = 180 - direction_prin
+               direction_new = direction - direction_prin
+               u = magnitude_plan * np.sin(direction_new * np.pi/180)
+               v = magnitude_plan * np.cos(direction_new * np.pi/180)
+               
                list_u.append(u)
                list_v.append(v)
                
@@ -507,6 +525,7 @@ class wind:
           plt.title("Evolution in time of the wind speed")
           plt.grid()
           plt.legend()
+          plt.show()
           plt.figure()
           plt.plot(list_time, list_u, label = "West/East wind $U_x$")
           plt.plot(list_time, list_v, label = "South/North wind $U_y$")
@@ -516,8 +535,8 @@ class wind:
           plt.title("Evolution in time of the wind speed")
           plt.grid()
           plt.legend()
-          
           plt.show()
+          
           # Output as the data computed for prediction
           return(list_time, list_prin, list_late, list_u, list_v, list_w)
 
@@ -606,8 +625,8 @@ def spectre_prin(frequency, speed, altitude):
          The value of the DSP for these parameters
     """
     
-    lu = altitude/((0.177+0.00823*altitude)**(1.2))
-    S = 4*lu/speed * 1/((1 + 70.7*(frequency*lu/speed)**2)**(5/6))
+    lu = altitude/((A_Z+B_Z*altitude)**(C_Z))
+    S = 4*lu/speed * 1/((1 + D_PRIN*(frequency*lu/speed)**2)**(PENTE_PRIN))
     
     return(S)
 
@@ -630,8 +649,8 @@ def spectre_late(frequency, speed, altitude):
          The value of the DSP for these parameters
     """
     
-    lv = altitude/((0.177+0.00823*altitude)**(1.2))
-    S = 4*lv/speed * (1 + 188.4*(2*frequency*lv/speed)**2)/((1 + 70.7*(2*frequency*lv/speed)**2)**(11/6))
+    lv = altitude/((A_Z+B_Z*altitude)**(C_Z))
+    S = 4*lv/speed * (1 + D_LATW*(2*frequency*lv/speed)**2)/((1 + D_PRIN*(2*frequency*lv/speed)**2)**(PENTE_LATW))
     
     return(S)
 
@@ -655,7 +674,7 @@ def spectre_w(frequency, speed, altitude):
     """
     
     lw = altitude
-    S = 4*lw/speed * (1 + 188.4*(2*frequency*lw/speed)**2)/((1 + 70.7*(2*frequency*lw/speed)**2)**(11/6))
+    S = 4*lw/speed * (1 + D_LATW*(2*frequency*lw/speed)**2)/((1 + D_PRIN*(2*frequency*lw/speed)**2)**(PENTE_LATW))
     
     return(S)
 

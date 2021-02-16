@@ -2,23 +2,24 @@ from typing import List
 
 
 def main(input_path: str, simu_name: str):
-    """
+    """Launch the wind ninja simulation and create the simulation files
+    
         Parameters
         ----------
-        input_path : TYPE STRING
+        input_path : String
             Name of the input path, where you must put the .tif and  #Hour of collection of the data. Pleaqe type '00' for midnight, '06' for 6 AM and '22' for 10 PM.
-        simu_name : TYPE STRING
-            #DESCRIPTION. Altitude value for which we want to get the data. Please chose between 10m,20m,50m and 100m
+        simu_name : String
+            The path of the folder where every files is going to be stored
 
         Returns
         -------
-          : TYPE bool
-            True, if it is works.
-            False, if:
-                The input folder doesn't exist, or
-                The configuration file .json doesn't exist, or
-                The terrain file .tif doesn't exist, or
-                The wind file .??? doesn't exist, or
+            bool
+                True, if it is works.
+                False, if:
+                    The input folder doesn't exist, or
+                    The configuration file .json doesn't exist, or
+                    The terrain file .tif doesn't exist, or
+                    The wind file .??? doesn't exist, or
         """
     import os, json
 

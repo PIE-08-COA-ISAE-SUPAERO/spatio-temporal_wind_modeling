@@ -15,7 +15,7 @@ import numpy.random as rd
 import json
 import os 
 
-#import windNinja_function as wn_function
+import wind_ninja_functions as wn_function
 import vtk_functions as vtk
 import extrapolation 
 import plots

@@ -4,4 +4,4 @@
 - Oussama Guedira
 - Quentin Abeille
 - Sebastien Laigret
-- Loïc Roux
+- Loic Roux

@@ -63,16 +63,23 @@ class wind:
           self._folder_name = ""
 
      def __str__(self):
-          #txt = ""
-          #for key, val in self._convert2dico().items():
-               #if type(val) != dict :
-                    #txt += key + " : " + val + ",\n"
-               #elif key == "Location":
-                    #txt += key + + "(" + val[0] + "," + val[1] +"),\n"
-               #elif key == "list_point":
-                    #txt += key  + " : " + "(x,y,z)" + self._nb_points + " elts,\n"
-               #elif key == "wind_cube":
-                    #txt += key  + " : " + "(position, wind speeds, surface altitude)" + self._nb_points + " elts,\n"
+          """Overloading of the print function
+
+          Returns
+          -------
+          String
+              The string to print
+          """          
+          txt = ""
+          for key, val in self._convert2dico().items():
+               if type(val) != dict :
+                    txt += key + " : " + val + ",\n"
+               elif key == "Location":
+                    txt += key + + "(" + val[0] + "," + val[1] +"),\n"
+               elif key == "list_point":
+                    txt += key  + " : " + "(x,y,z)" + self._nb_points + " elts,\n"
+               elif key == "wind_cube":
+                    txt += key  + " : " + "(position, wind speeds, surface altitude)" + self._nb_points + " elts,\n"
 
           return txt
 
@@ -319,12 +326,23 @@ class wind:
           wind_speed = np.sqrt(u**2 + v**2 + w**2)
           wind_speed_flat = np.sqrt(u**2 + v**2)
           
-          direction = np.rad2deg(np.arccos(v / wind_speed_flat))
-          #Correction to bring if the wind comes from the west instead of the east
-          if u < 0 : direction *= -1
+          if u == 0 :
+               if v > 0 : 
+                    direction = 180
+               else :
+                    direction = 0
+          elif v == 0 :
+               if  u > 0 :
+                    direction = 270
+               else :
+                    direction = 90
+          else :
+               if u < 0 :
+                    direction = 90 - np.rad2deg(np.arctan2(u,v))
+               else :
+                    direction = 270 - np.rad2deg(np.arctan2(u,v))
           
           return u, v, w, wind_speed, wind_speed_flat, direction
-
 
      def turbulence(self, latitude, longitude, altitude, time):
           """
@@ -646,6 +664,20 @@ def file_list_by_extension(file_dir, file_extension):
      return  [_ for _ in os.listdir(file_dir) if _.endswith(file_extension)] 
 
 def np_array_index(point, list_point):
+     """Find the index of a np-array inside a 2D np-array
+
+     Parameters
+     ----------
+     point : np-array
+         the np-array to find 
+     list_point : 2D np-array
+         The 2D np-array where to find the point inside
+
+     Returns
+     -------
+     Integer
+         The index of the point inside list_point
+     """     
      [x, y, z] = point
      
      cond_x = list_point[:,0] == x

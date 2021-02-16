@@ -309,6 +309,7 @@ def main(points,wind,points_surf,elev_max, step):
             
             # Extrapolation of the different fields
             Z_pos_extrap = np.linspace(Z_tick[-1],elev_max,step)
+            Z_pos_extrap = Z_pos_extrap[1:]  # Removing last point of Wind Ninja
             param_pow = get_extrap_law(Z_tick,U_pos,power_law)[2]
             U_pos_extrap = power_law(Z_pos_extrap,param_pow[0], param_pow[1])
             

@@ -83,14 +83,14 @@ class wind:
           """          
           txt = ""
           for key, val in self._convert2dico().items():
-               if type(val) != dict :
-                    txt += key + " : " + val + ",\n"
-               elif key == "Location":
-                    txt += key + + "(" + val[0] + "," + val[1] +"),\n"
+               if key == "Location":
+                    txt += key + " : (" + str(val[0]) + ", " + str(val[1]) +"),\n"
                elif key == "list_point":
-                    txt += key  + " : " + "(x,y,z)" + self._nb_points + " elts,\n"
+                    txt += key  + " : " + "{x,y,z}, " + str(self._nb_points) + " elts,\n"
                elif key == "wind_cube":
-                    txt += key  + " : " + "(position, wind speeds, surface altitude)" + self._nb_points + " elts,\n"
+                    txt += key  + " : " + "{position, wind speeds, surface altitude}, " + str(self._nb_points) + " elts,\n"
+               else:
+                    txt += key + " : " + str(val) + ",\n"
 
           return txt
 
@@ -248,6 +248,13 @@ class wind:
           return True
                
      def get_data(self):
+          """Return the dictionnary of the object
+
+          Returns
+          -------
+          dict
+              The dictionary which represents the object
+          """          
           return self._convert2dico()
      
      def get_point(self, latitude, longitude, altitude):
@@ -280,8 +287,7 @@ class wind:
                     The direction the wind came from, in ° 
 
           """
-                    
-          #Check if the point exists
+          #Get the distance the cube uses
           x_wanted, y_wanted = flat_distance_point((latitude, longitude), self._location)
           z_wanted = altitude
           
@@ -298,19 +304,24 @@ class wind:
           x_min, x_max = smallest_interval(x_wanted, self._list_point["x"])
           y_min, y_max = smallest_interval(y_wanted, self._list_point["y"])
           
-          #Find the surface in this cube
+          #Find the surface in this small cube
           surface_alt = extrapolation.get_Zlist_pos(x_max, y_max, map_surface)[1]
           surface_alt = np.unique(surface_alt)[0]
 
-          z_min, z_max = smallest_interval(z_wanted, self._list_point["z"])
-          min_z = surface_alt
-          max_z = min_z + self._elevation_max
-          
           #Check the z boundary
-          if z_wanted < min_z or max_z < z_wanted :
-               print("This point does not belong in the cube")
+          min_z = surface_alt
+          max_z = min_z + self._elevation_max          
+          if z_wanted < min_z:
+               print("This point is below ground : " + str(z_wanted) + "m VS " + str(min_z) + "m")
+               return 0
+
+          if max_z < z_wanted :
+               print("This point is to high above the ground : " + str(z_wanted) + "m VS " + str(max_z) + "m")
                return 0
           
+          z_min, z_max = smallest_interval(z_wanted, self._list_point["z"])
+
+
           #Get the distance for the interpolation
           dx = x_max - x_min
           dy = y_max - y_min
@@ -385,8 +396,7 @@ class wind:
                     The direction the wind came from, in ° 
           """
           
-          u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(latitude, \
-                                                                           longitude, altitude)
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
 
           fs = 10 # frequence sampling
           N = int(time * fs) # Max number of modes
@@ -456,8 +466,7 @@ class wind:
                     The evolution of the vertical wind speed 
           """
           
-          u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(self, \
-                                                       latitude, longitude, altitude)
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
           
           fs = 1/timestep # frequence sampling
           TEMPS_MAX = 900 # observation of the profile during 15 minutes
@@ -539,12 +548,6 @@ class wind:
           
           # Output as the data computed for prediction
           return(list_time, list_prin, list_late, list_u, list_v, list_w)
-
-     #def plot_wind_surface(self, axis, coord, alt, plot):
-          #return plots.plot_wind_surface(axis, coord, alt, plot)
-
-     #def plot_wind_cube(self, xlim, ylim, zlim, plot):
-          #return plots.plot_wind_cube(xlim, ylim, zlim, plot)
 
 #---------------------------------------------------------
 # #%% AUXILIARY
@@ -710,12 +713,3 @@ def np_array_index(point, list_point):
           return 0
      else :    
           return np.argwhere(cond==True)[0,0]
-
-d = wind()
-#d.create_wind_cube("G:/Mon Drive/PIE COA 08/Architecture code/TEST","G:/Mon Drive/PIE COA 08/Architecture code/TEST")
-d.import_wind_cube("G:/Mon Drive/PIE COA 08/Architecture code/TEST/exported_data_02-02-2021_13-15.json")
-print(d)
-#print(d.get_point(46.95, -113.1, 2000))
-#print(d.turbulence(46.95, -113.1, 2000, 60))
-
-#d.profil_turbulence(46.95, -113.1, 2000,1)

@@ -3,6 +3,6 @@
 - Alexandre Liberal Cavalcanti
 - Oussama Guedira
 - Quentin Abeille
-- Sebastien Laigret
+- Sébastien Laigret
 - Loic Roux
 - moi

@@ -57,13 +57,25 @@ class wind:
           self._date = ""
           
           #The location of the wind cube : the southwesternmost point of the cube
-          self._location = (0,0)
+          self._location = [0,0]
           
           #The name of the folder
           self._folder_name = ""
 
      def __str__(self):
-          return self._convert2dico().__str__()
+          #txt = ""
+          #for key, val in self._convert2dico().items():
+               #if type(val) != dict :
+                    #txt += key + " : " + val + ",\n"
+               #elif key == "Location":
+                    #txt += key + + "(" + val[0] + "," + val[1] +"),\n"
+               #elif key == "list_point":
+                    #txt += key  + " : " + "(x,y,z)" + self._nb_points + " elts,\n"
+               #elif key == "wind_cube":
+                    #txt += key  + " : " + "(position, wind speeds, surface altitude)" + self._nb_points + " elts,\n"
+
+          return txt
+
 
      def _convert2dico(self):
           """
@@ -90,9 +102,9 @@ class wind:
                "Elevation_max" : self._elevation_max,
                "nb_layer_extrapolation" : self._nb_layer_extrapolation,
                "nb_points": self._nb_points,
+               "folder_name" : self._folder_name, 
                "list_point" : list_point_temp,
-               "wind_cube" : wind_cube_temp,
-               "folder_name" : self._folder_name
+               "wind_cube" : wind_cube_temp
                }
 
           return wind_cube
@@ -491,11 +503,11 @@ class wind:
           # Output as the data computed for prediction
           return(list_time, list_prin, list_late, list_u, list_v, list_w)
 
-     def plot_wind_surface(self, axis, coord, alt, plot):
-          return plots.plot_wind_surface(axis, coord, alt, plot)
+     #def plot_wind_surface(self, axis, coord, alt, plot):
+          #return plots.plot_wind_surface(axis, coord, alt, plot)
 
-     def plot_wind_cube(self, xlim, ylim, zlim, plot):
-          return plots.plot_wind_cube(xlim, ylim, zlim, plot)
+     #def plot_wind_cube(self, xlim, ylim, zlim, plot):
+          #return plots.plot_wind_cube(xlim, ylim, zlim, plot)
 
 #---------------------------------------------------------
 # #%% AUXILIARY
@@ -651,9 +663,8 @@ def np_array_index(point, list_point):
 d = wind()
 #d.create_wind_cube("G:/Mon Drive/PIE COA 08/Architecture code/TEST","G:/Mon Drive/PIE COA 08/Architecture code/TEST")
 d.import_wind_cube("G:/Mon Drive/PIE COA 08/Architecture code/TEST/exported_data_02-02-2021_13-15.json")
+print(d)
 #print(d.get_point(46.95, -113.1, 2000))
 #print(d.turbulence(46.95, -113.1, 2000, 60))
 
 #d.profil_turbulence(46.95, -113.1, 2000,1)
-
-d.plot_wind_cube([0,1000],[1000,2000], [0,4000], True)

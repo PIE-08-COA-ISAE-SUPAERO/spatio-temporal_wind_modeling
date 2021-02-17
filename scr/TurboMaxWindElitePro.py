@@ -570,8 +570,9 @@ class wind:
                3D-mesh for the interpolated wind speed component along z-axis.
           Sinterp : Narray of floats
                3D-mesh for the interpolated surface altitude.
-        """
-          return plots.plot_wind_surface(self._wind_cube, axis, coord, alt, plot)
+          """
+          coordxy_tuple = flat_distance_point(self._location, coord)
+          return plots.plot_wind_surface(self._wind_cube, axis, [coordxy_tuple[0],coordxy_tuple[1]], alt, plot)
      
      def plot_wind_cube(self, xlim, ylim, zlim, plot):
           """

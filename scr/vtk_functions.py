@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Feb  4 17:38:06 2021
+"""vtk functions.
 
-@author: 33658
+This module contains all the functions required use the .vtk file by the program
+
+@author: O. Guedira (2020)
 """
 
 import numpy as np

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Feb  9 17:10:12 2021
+"""Plots.
 
-@author: abeil
+This module contains all the functions required to plot the wind cube data
+
+@author: Q.Abeille (2020)
 """
 
 #%% Imports

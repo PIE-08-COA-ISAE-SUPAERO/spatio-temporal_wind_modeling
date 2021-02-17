@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-@author: PIE COA 08:
+"""Wind class
+
+This module contains the wind class and every function linked to it
+
+@author: PIE COA 08 (2020)
      Sébastien Laigret
      Loïc Roux
      Alexandre Cavalcanti

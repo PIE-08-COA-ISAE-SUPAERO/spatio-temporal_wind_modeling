@@ -420,7 +420,20 @@ class wind:
           v = magnitude_plan * np.sin(direction_prov * np.pi/180)
           w = wind_w
           direction = direction_plan(u, v)  
-          
+          # Plot of the windrose
+          fig = plt.figure()
+          ax = fig.add_subplot(111, projection="polar")
+          title = "Windrose (" + str(round(latitude,2)) + "°," + str(round(longitude,2)) + "°) : " + str(round(magnitude_plan,1)) + " m/s, " + str(round(direction,1)) + "°"
+          ax.set_title(title)
+          ax.set_rmin(0)
+          ax.set_rmax(max(25,magnitude_plan + 5))
+          ax.set_thetalim(0, 2*np.pi)
+          ax.set_theta_direction(-1)
+          ax.set_theta_zero_location("N")
+          plt.arrow(direction*np.pi/180, magnitude_plan + 0.5, 0, -magnitude_plan, \
+                    width = 0.1, lw = 1, length_includes_head = True, head_width=1, \
+                         head_length=3, shape = "full", overhang = 0.5)
+          plt.show()
           return(u, v, w, magnitude, magnitude_plan, direction)
 
 

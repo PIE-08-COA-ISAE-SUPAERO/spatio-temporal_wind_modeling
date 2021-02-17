@@ -380,7 +380,7 @@ class wind:
                     The direction the wind came from, in ° 
           """
           
-          u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(latitude, \
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, \
                                                                  longitude, altitude)
 
           fs = 10 # frequence sampling
@@ -451,7 +451,7 @@ class wind:
                     The evolution of the vertical wind speed 
           """
           
-          u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(latitude, \
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, \
                                                                  longitude, altitude)
           
           fs = 1/timestep # frequence sampling

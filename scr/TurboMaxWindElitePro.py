@@ -15,14 +15,25 @@ import numpy.random as rd
 import json
 import os 
 
-#import windNinja_function as wn_function
+import wind_ninja_functions as wn_function
 import vtk_functions as vtk
 import extrapolation 
 import plots
 
-## Global variable
-R_terre = 6371 #Rayon en km de la terre
+#%% Global variable
+R_terre = 6371 #Earth radius (km)
 
+#Some variable for turbulence
+A_Z = 0.177
+B_Z = 0.00823
+C_Z = 1.2
+
+PENTE_PRIN = 5/6
+D_PRIN = 70.7
+PENTE_LATW = 11/6
+D_LATW = 188.4
+
+#%% The class
 class wind:
      
      def __init__(self):
@@ -63,16 +74,23 @@ class wind:
           self._folder_name = ""
 
      def __str__(self):
-          #txt = ""
-          #for key, val in self._convert2dico().items():
-               #if type(val) != dict :
-                    #txt += key + " : " + val + ",\n"
-               #elif key == "Location":
-                    #txt += key + + "(" + val[0] + "," + val[1] +"),\n"
-               #elif key == "list_point":
-                    #txt += key  + " : " + "(x,y,z)" + self._nb_points + " elts,\n"
-               #elif key == "wind_cube":
-                    #txt += key  + " : " + "(position, wind speeds, surface altitude)" + self._nb_points + " elts,\n"
+          """Overloading of the print function
+
+          Returns
+          -------
+          String
+              The string to print
+          """          
+          txt = ""
+          for key, val in self._convert2dico().items():
+               if key == "Location":
+                    txt += key + " : (" + str(val[0]) + ", " + str(val[1]) +"),\n"
+               elif key == "list_point":
+                    txt += key  + " : " + "{x,y,z}, " + str(self._nb_points) + " elts,\n"
+               elif key == "wind_cube":
+                    txt += key  + " : " + "{position, wind speeds, surface altitude}, " + str(self._nb_points) + " elts,\n"
+               else:
+                    txt += key + " : " + str(val) + ",\n"
 
           return txt
 
@@ -230,6 +248,13 @@ class wind:
           return True
                
      def get_data(self):
+          """Return the dictionnary of the object
+
+          Returns
+          -------
+          dict
+              The dictionary which represents the object
+          """          
           return self._convert2dico()
      
      def get_point(self, latitude, longitude, altitude):
@@ -262,8 +287,7 @@ class wind:
                     The direction the wind came from, in ° 
 
           """
-                    
-          #Check if the point exists
+          #Get the distance the cube uses
           x_wanted, y_wanted = flat_distance_point((latitude, longitude), self._location)
           z_wanted = altitude
           
@@ -280,19 +304,24 @@ class wind:
           x_min, x_max = smallest_interval(x_wanted, self._list_point["x"])
           y_min, y_max = smallest_interval(y_wanted, self._list_point["y"])
           
-          #Find the surface in this cube
+          #Find the surface in this small cube
           surface_alt = extrapolation.get_Zlist_pos(x_max, y_max, map_surface)[1]
           surface_alt = np.unique(surface_alt)[0]
 
-          z_min, z_max = smallest_interval(z_wanted, self._list_point["z"])
-          min_z = surface_alt
-          max_z = min_z + self._elevation_max
-          
           #Check the z boundary
-          if z_wanted < min_z or max_z < z_wanted :
-               print("This point does not belong in the cube")
+          min_z = surface_alt
+          max_z = min_z + self._elevation_max          
+          if z_wanted < min_z:
+               print("This point is below ground : " + str(z_wanted) + "m VS " + str(min_z) + "m")
+               return 0
+
+          if max_z < z_wanted :
+               print("This point is to high above the ground : " + str(z_wanted) + "m VS " + str(max_z) + "m")
                return 0
           
+          z_min, z_max = smallest_interval(z_wanted, self._list_point["z"])
+
+
           #Get the distance for the interpolation
           dx = x_max - x_min
           dy = y_max - y_min
@@ -319,12 +348,7 @@ class wind:
           wind_speed = np.sqrt(u**2 + v**2 + w**2)
           wind_speed_flat = np.sqrt(u**2 + v**2)
           
-          direction = np.rad2deg(np.arccos(v / wind_speed_flat))
-          #Correction to bring if the wind comes from the west instead of the east
-          if u < 0 : direction *= -1
-          
-          return u, v, w, wind_speed, wind_speed_flat, direction
-
+          return u, v, w, wind_speed, wind_speed_flat, direction_plan(u, v)
 
      def turbulence(self, latitude, longitude, altitude, time):
           """
@@ -356,7 +380,8 @@ class wind:
                     The direction the wind came from, in ° 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, \
+                                                                 longitude, altitude)
 
           fs = 10 # frequence sampling
           N = int(time * fs) # Max number of modes
@@ -384,12 +409,14 @@ class wind:
           # Deviation with regards the principal axis
           magnitude = np.sqrt(wind_prin**2 + wind_late**2 + wind_w**2)
           magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)
-          direction_prin = np.arctan(wind_late/wind_prin)*180/np.pi
+          direction_prin = 270 - direction_plan(wind_prin, wind_late)
+          direction_base = 270 - direction
                                    
-          direction = direction + direction_prin
-          u = magnitude_plan * np.cos(direction * np.pi/180)
-          v = magnitude_plan * np.sin(direction * np.pi/180)
-          w = wind_w    
+          direction_prov = direction_base + direction_prin
+          u = magnitude_plan * np.cos(direction_prov * np.pi/180)
+          v = magnitude_plan * np.sin(direction_prov * np.pi/180)
+          w = wind_w
+          direction = direction_plan(u, v)  
           
           return(u, v, w, magnitude, magnitude_plan, direction)
 
@@ -424,10 +451,11 @@ class wind:
                     The evolution of the vertical wind speed 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, \
+                                                                 longitude, altitude)
           
           fs = 1/timestep # frequence sampling
-          TEMPS_MAX = 600 # observation of the profile during 15 minutes
+          TEMPS_MAX = 900 # observation of the profile during 15 minutes
           N = int(TEMPS_MAX * fs) # Max number of modes
           
           # Table of random Fourier coefficients
@@ -471,13 +499,16 @@ class wind:
                list_prin.append(wind_prin)
                list_late.append(wind_late)
                list_w.append(wind_w)
-               magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)
-               direction_prin = np.arctan(wind_late/wind_prin)*180/np.pi
-               direction_new = direction + direction_prin
+               magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)      
+               
+               direction_prin = 270 - direction_plan(wind_prin, wind_late)
+               direction_base = 270 - direction
+               direction_new = direction_base + direction_prin
                u = magnitude_plan * np.cos(direction_new * np.pi/180)
                v = magnitude_plan * np.sin(direction_new * np.pi/180)
+               
                list_u.append(u)
-               list_v.append(v)
+               list_v.append(v)  
                
           # Output as a graph of wind evolution in time
           plt.figure()
@@ -489,6 +520,7 @@ class wind:
           plt.title("Evolution in time of the wind speed")
           plt.grid()
           plt.legend()
+          plt.show()
           plt.figure()
           plt.plot(list_time, list_u, label = "West/East wind $U_x$")
           plt.plot(list_time, list_v, label = "South/North wind $U_y$")
@@ -498,16 +530,10 @@ class wind:
           plt.title("Evolution in time of the wind speed")
           plt.grid()
           plt.legend()
-          
           plt.show()
+          
           # Output as the data computed for prediction
           return(list_time, list_prin, list_late, list_u, list_v, list_w)
-
-     #def plot_wind_surface(self, axis, coord, alt, plot):
-          #return plots.plot_wind_surface(axis, coord, alt, plot)
-
-     #def plot_wind_cube(self, xlim, ylim, zlim, plot):
-          #return plots.plot_wind_cube(xlim, ylim, zlim, plot)
 
 #---------------------------------------------------------
 # #%% AUXILIARY
@@ -588,8 +614,8 @@ def spectre_prin(frequency, speed, altitude):
          The value of the DSP for these parameters
     """
     
-    lu = altitude/((0.177+0.00823*altitude)**(1.2))
-    S = 4*lu/speed * 1/((1 + 70.7*(frequency*lu/speed)**2)**(5/6))
+    lu = altitude/((A_Z+B_Z*altitude)**(C_Z))
+    S = 4*lu/speed * 1/((1 + D_PRIN*(frequency*lu/speed)**2)**(PENTE_PRIN))
     
     return(S)
 
@@ -612,8 +638,8 @@ def spectre_late(frequency, speed, altitude):
          The value of the DSP for these parameters
     """
     
-    lv = altitude/((0.177+0.00823*altitude)**(1.2))
-    S = 4*lv/speed * (1 + 188.4*(2*frequency*lv/speed)**2)/((1 + 70.7*(2*frequency*lv/speed)**2)**(11/6))
+    lv = altitude/((A_Z+B_Z*altitude)**(C_Z))
+    S = 4*lv/speed * (1 + D_LATW*(2*frequency*lv/speed)**2)/((1 + D_PRIN*(2*frequency*lv/speed)**2)**(PENTE_LATW))
     
     return(S)
 
@@ -637,7 +663,7 @@ def spectre_w(frequency, speed, altitude):
     """
     
     lw = altitude
-    S = 4*lw/speed * (1 + 188.4*(2*frequency*lw/speed)**2)/((1 + 70.7*(2*frequency*lw/speed)**2)**(11/6))
+    S = 4*lw/speed * (1 + D_LATW*(2*frequency*lw/speed)**2)/((1 + D_PRIN*(2*frequency*lw/speed)**2)**(PENTE_LATW))
     
     return(S)
 
@@ -646,6 +672,20 @@ def file_list_by_extension(file_dir, file_extension):
      return  [_ for _ in os.listdir(file_dir) if _.endswith(file_extension)] 
 
 def np_array_index(point, list_point):
+     """Find the index of a np-array inside a 2D np-array
+
+     Parameters
+     ----------
+     point : np-array
+         the np-array to find 
+     list_point : 2D np-array
+         The 2D np-array where to find the point inside
+
+     Returns
+     -------
+     Integer
+         The index of the point inside list_point
+     """     
      [x, y, z] = point
      
      cond_x = list_point[:,0] == x
@@ -660,11 +700,30 @@ def np_array_index(point, list_point):
      else :    
           return np.argwhere(cond==True)[0,0]
 
-d = wind()
-#d.create_wind_cube("G:/Mon Drive/PIE COA 08/Architecture code/TEST","G:/Mon Drive/PIE COA 08/Architecture code/TEST")
-d.import_wind_cube("G:/Mon Drive/PIE COA 08/Architecture code/TEST/exported_data_02-02-2021_13-15.json")
-print(d)
-#print(d.get_point(46.95, -113.1, 2000))
-#print(d.turbulence(46.95, -113.1, 2000, 60))
-
-#d.profil_turbulence(46.95, -113.1, 2000,1)
+def direction_plan(u, v):
+    """
+    Return the direction of the origin of the wind (where it comes from)
+    Parameters
+    ----------
+    u : double 
+        The west to east component of the wind speed
+    v : double 
+        The south to north component of the wind speed
+    Returns
+    -------
+    direction : double 
+         The angle, in degree, of the coming wind
+    """
+    
+    magnitude = np.sqrt(u**2 + v**2)
+    angle = 180/np.pi * np.arccos(abs(u)/magnitude)
+    if u > 0 and v > 0 :
+        direction = 270 - angle
+    if u > 0 and v < 0 :
+        direction = 270 + angle
+    if u < 0 and v < 0 :
+        direction = 90 - angle
+    if u < 0 and v > 0 :
+        direction = 90 + angle
+    
+    return(direction%360)

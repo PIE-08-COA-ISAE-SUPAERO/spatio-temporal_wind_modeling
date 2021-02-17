@@ -264,21 +264,29 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, plot):
         3D-mesh for the interpolated surface altitude.
 
     """
-    
-    global data_points = wind_cube["Position"]
-    global data_wind = wind_cube["Wind_speed"]
-    global data = np.concatenate((data_points, data_wind, Zsurf),axis=1)
-    global Zsurf = wind_cube["Surface_altitude"]
+    global data_points
+    data_points = wind_cube["Position"]
+    global data_wind
+    data_wind = wind_cube["Wind_speed"]
+    global Zsurf
+    Zsurf = wind_cube["Surface_altitude"].reshape(-1,1)
+    global data
+    data = np.concatenate((data_points, data_wind, Zsurf),axis=1)
 
     #Récupération du maillage horizontal
-    global X = data[:,0]
-    global Y = data[:,1]
-    global X_tick = np.unique(X)
-    global Y_tick = np.unique(Y)
-    global Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
+    global X
+    X = data[:,0]
+    global Y
+    Y = data[:,1]
+    global X_tick
+    X_tick = np.unique(X)
+    global Y_tick
+    Y_tick = np.unique(Y)
+    global Z_tick
+    Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
     
     # Interpolation
-    X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim,ylim,zlim)
+    X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim,ylim,zlim,False)
     
     # Plotting the wind-cube if required
     if plot == True:
@@ -289,6 +297,7 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, plot):
         plt.ion()
         plt.xlabel('x (m)')
         plt.ylabel('y (m)')
+        plt.show()
         
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp
 
@@ -327,17 +336,26 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
         3D-mesh for the interpolated surface altitude.
 
     """
-    global data_points = wind_cube["Position"]
-    global data_wind = wind_cube["Wind_speed"]
-    global data = np.concatenate((data_points, data_wind, Zsurf),axis=1)
-    global Zsurf = wind_cube["Surface_altitude"]
+    global data_points
+    data_points = wind_cube["Position"]
+    global data_wind 
+    data_wind = wind_cube["Wind_speed"]
+    global Zsurf
+    Zsurf = wind_cube["Surface_altitude"].reshape(-1,1)
+    global data 
+    data = np.concatenate((data_points, data_wind, Zsurf),axis=1)
 
     #Récupération du maillage horizontal
-    global X = data[:,0]
-    global Y = data[:,1]
-    global X_tick = np.unique(X)
-    global Y_tick = np.unique(Y)
-    global Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
+    global X
+    X = data[:,0]
+    global Y
+    Y = data[:,1]
+    global X_tick
+    X_tick = np.unique(X)
+    global Y_tick
+    Y_tick = np.unique(Y)
+    global Z_tick
+    Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
     
     # Wind profile
     if axis == "x" or axis == "y":
@@ -399,6 +417,8 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
             plt.ylabel('altitude (m)')
             plt.grid(which='both')
             plt.title('Wind profile at x=%6.2fm y=%6.2fm' %(x,y))
+
+            plt.show()
             
     else:
         # Wind surface
@@ -450,6 +470,8 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
                 plt.xlabel('x (m)')
                 plt.ylabel('y (m)')
                 plt.grid()
+
+                plt.show()
             
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp
 

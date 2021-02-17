@@ -18,7 +18,7 @@ import numpy.random as rd
 import json
 import os 
 
-import wind_ninja_functions as wn_function
+#import wind_ninja_functions as wn_function
 import vtk_functions as vtk
 import extrapolation 
 import plots
@@ -537,6 +537,76 @@ class wind:
           
           # Output as the data computed for prediction
           return(list_time, list_prin, list_late, list_u, list_v, list_w)
+
+     def plot_wind_surface(self, axis, coord, alt, plot):
+          """
+          Calculates a wind profile or a wind surface from the wind_cube.
+
+          Parameters
+          ----------
+          axis : string
+               Type of interpoltion to do. "z" for a wind surface, "x" or "y" for a
+               wind profile.
+          coord : Narry of float
+               Coordinates of the point for the wind profile.
+          alt : float
+               Altitude for the wind surface.
+          plot : Bool
+               Activates the plot option.
+
+          Returns
+          -------
+          X_mesh : Narray of floats
+               3D-mesh for the interpolated x coordinates.
+          Y_mesh : Narray of floats
+               3D-mesh for the interpolated x coordinates.
+          Z_mesh : Narray of floats
+               3D-mesh for the interpolated x coordinates.
+          Uinterp : Narray of floats
+               3D-mesh for the interpolated wind speed component along x-axis.
+          Vinterp : Narray of floats
+               3D-mesh for the interpolated wind speed component along y-axis.
+          Winterp : Narray of floats
+               3D-mesh for the interpolated wind speed component along z-axis.
+          Sinterp : Narray of floats
+               3D-mesh for the interpolated surface altitude.
+        """
+          return plots.plot_wind_surface(self._wind_cube, axis, coord, alt, plot)
+     
+     def plot_wind_cube(self, xlim, ylim, zlim, plot):
+          """
+          Calculates a wind_cube inside the wind_cube and plots it if needed.
+
+          Parameters
+          ----------
+          xlim : Narray of floats
+               Numpy array of size 2 containing the limits of the x-axis range.
+          ylim : Narray of floats
+               Numpy array of size 2 containing the limits of the y-axis range.
+          zlim : Narray of floats
+               Numpy array of size 2 containing the limits of the z-axis range.
+          plot : Bool
+               Activates the plot or not.
+               
+          Returns
+          -------
+          X_mesh : Narray of floats
+               3D-mesh for the interpolated x coordinates.
+          Y_mesh : Narray of floats
+               3D-mesh for the interpolated x coordinates.
+          Z_mesh : Narray of floats
+               3D-mesh for the interpolated x coordinates.
+          Uinterp : Narray of floats
+               3D-mesh for the interpolated wind speed component along x-axis.
+          Vinterp : Narray of floats
+               3D-mesh for the interpolated wind speed component along y-axis.
+          Winterp : Narray of floats
+               3D-mesh for the interpolated wind speed component along z-axis.
+          Sinterp : Narray of floats
+               3D-mesh for the interpolated surface altitude.
+
+          """
+          return plots.plot_wind_cube(self._wind_cube, xlim, ylim, zlim, plot)
 
 #---------------------------------------------------------
 # #%% AUXILIARY

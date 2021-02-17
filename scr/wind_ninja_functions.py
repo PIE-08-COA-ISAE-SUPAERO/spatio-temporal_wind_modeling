@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Wind Ninja simulation.
+
+This module contains all the functions required to launch the wind ninja simulation.
+
+@author: A. Cavalcanti Liberal (2020)
+"""
 from typing import List
 
 

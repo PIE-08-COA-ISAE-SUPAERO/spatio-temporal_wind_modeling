@@ -13,17 +13,6 @@ from mpl_toolkits.mplot3d import axes3d
 from scipy.interpolate import LinearNDInterpolator
 import extrapolation as interp
 
-#%% Récupération fichier texte
-#data = np.loadtxt('extrap_field.txt')
-
-#Récupération du maillage horizontal
-#X = data[:,0]
-#Y = data[:,1]
-#Z_surf = data[:,6]
-#X_tick = np.unique(X)
-#Y_tick = np.unique(Y)
-#Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
-
 #%% Cube de vent
 
 def get_tick_argminmax(cond_min,cond_max):
@@ -275,6 +264,18 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, plot):
 
     """
     
+    global data_points = wind_cube["Position"]
+    global data_wind = wind_cube["Wind_speed"]
+    global data = np.concatenate((data_points, data_wind, Zsurf),axis=1)
+    global Zsurf = wind_cube["Surface_altitude"]
+
+    #Récupération du maillage horizontal
+    global X = data[:,0]
+    global Y = data[:,1]
+    global X_tick = np.unique(X)
+    global Y_tick = np.unique(Y)
+    global Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
+    
     # Interpolation
     X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim,ylim,zlim)
     
@@ -325,8 +326,18 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
         3D-mesh for the interpolated surface altitude.
 
     """
-    global Z_tick 
-    global data
+    global data_points = wind_cube["Position"]
+    global data_wind = wind_cube["Wind_speed"]
+    global data = np.concatenate((data_points, data_wind, Zsurf),axis=1)
+    global Zsurf = wind_cube["Surface_altitude"]
+
+    #Récupération du maillage horizontal
+    global X = data[:,0]
+    global Y = data[:,1]
+    global X_tick = np.unique(X)
+    global Y_tick = np.unique(Y)
+    global Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
+    
     # Wind profile
     if axis == "x" or axis == "y":
         #Decomposing the coordinates

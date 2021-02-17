@@ -348,23 +348,7 @@ class wind:
           wind_speed = np.sqrt(u**2 + v**2 + w**2)
           wind_speed_flat = np.sqrt(u**2 + v**2)
           
-          if u == 0 :
-               if v > 0 : 
-                    direction = 180
-               else :
-                    direction = 0
-          elif v == 0 :
-               if  u > 0 :
-                    direction = 270
-               else :
-                    direction = 90
-          else :
-               if u < 0 :
-                    direction = 90 - np.rad2deg(np.arctan2(u,v))
-               else :
-                    direction = 270 - np.rad2deg(np.arctan2(u,v))
-          
-          return u, v, w, wind_speed, wind_speed_flat, direction
+          return u, v, w, wind_speed, wind_speed_flat, direction_plan(u, v)
 
      def turbulence(self, latitude, longitude, altitude, time):
           """
@@ -396,7 +380,8 @@ class wind:
                     The direction the wind came from, in ° 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(latitude, \
+                                                                 longitude, altitude)
 
           fs = 10 # frequence sampling
           N = int(time * fs) # Max number of modes
@@ -424,14 +409,14 @@ class wind:
           # Deviation with regards the principal axis
           magnitude = np.sqrt(wind_prin**2 + wind_late**2 + wind_w**2)
           magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)
-          direction_prin = np.arcsin(wind_late/magnitude_plan)*180/np.pi
-          if wind_prin < 0 :
-               direction_prin = 180 - direction_prin
+          direction_prin = 270 - direction_plan(wind_prin, wind_late)
+          direction_base = 270 - direction
                                    
-          direction = direction - direction_prin
-          u = magnitude_plan * np.sin(direction * np.pi/180)
-          v = magnitude_plan * np.cos(direction * np.pi/180)
-          w = wind_w    
+          direction_prov = direction_base + direction_prin
+          u = magnitude_plan * np.cos(direction_prov * np.pi/180)
+          v = magnitude_plan * np.sin(direction_prov * np.pi/180)
+          w = wind_w
+          direction = direction_plan(u, v)  
           
           return(u, v, w, magnitude, magnitude_plan, direction)
 
@@ -466,7 +451,8 @@ class wind:
                     The evolution of the vertical wind speed 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          u, v, w, wind_speed, wind_speed_flat, direction = self.get_point(latitude, \
+                                                                 longitude, altitude)
           
           fs = 1/timestep # frequence sampling
           TEMPS_MAX = 900 # observation of the profile during 15 minutes
@@ -513,16 +499,16 @@ class wind:
                list_prin.append(wind_prin)
                list_late.append(wind_late)
                list_w.append(wind_w)
-               magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)
-               direction_prin = np.arcsin(wind_late/magnitude_plan)*180/np.pi
-               if wind_prin < 0 :
-                    direction_prin = 180 - direction_prin
-               direction_new = direction - direction_prin
-               u = magnitude_plan * np.sin(direction_new * np.pi/180)
-               v = magnitude_plan * np.cos(direction_new * np.pi/180)
+               magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)      
+               
+               direction_prin = 270 - direction_plan(wind_prin, wind_late)
+               direction_base = 270 - direction
+               direction_new = direction_base + direction_prin
+               u = magnitude_plan * np.cos(direction_new * np.pi/180)
+               v = magnitude_plan * np.sin(direction_new * np.pi/180)
                
                list_u.append(u)
-               list_v.append(v)
+               list_v.append(v)  
                
           # Output as a graph of wind evolution in time
           plt.figure()
@@ -713,3 +699,31 @@ def np_array_index(point, list_point):
           return 0
      else :    
           return np.argwhere(cond==True)[0,0]
+
+def direction_plan(u, v):
+    """
+    Return the direction of the origin of the wind (where it comes from)
+    Parameters
+    ----------
+    u : double 
+        The west to east component of the wind speed
+    v : double 
+        The south to north component of the wind speed
+    Returns
+    -------
+    direction : double 
+         The angle, in degree, of the coming wind
+    """
+    
+    magnitude = np.sqrt(u**2 + v**2)
+    angle = 180/np.pi * np.arccos(abs(u)/magnitude)
+    if u > 0 and v > 0 :
+        direction = 270 - angle
+    if u > 0 and v < 0 :
+        direction = 270 + angle
+    if u < 0 and v < 0 :
+        direction = 90 - angle
+    if u < 0 and v > 0 :
+        direction = 90 + angle
+    
+    return(direction%360)

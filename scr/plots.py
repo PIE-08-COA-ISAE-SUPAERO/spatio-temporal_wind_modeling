@@ -91,6 +91,31 @@ def get_interv(xlim,ylim,zlim):
     z_min = zlim[0]
     z_max = zlim[1]
     
+    # Checking if limits inside the wind_cube boundaries
+    if x_min < X_tick[0]:
+        print("Lower x limit out of bounds")
+        return 0
+    
+    if x_max > X_tick[-1]:
+        print("Upper x limit out of bounds")
+        return 0
+    
+    if y_min < Y_tick[0]:
+        print("Lower y limit out of bounds")
+        return 0
+    
+    if y_max > Y_tick[-1]:
+        print("Upper y limit out of bounds")
+        return 0
+    
+    if z_min < Z_tick[0]:
+        print("Lower z limit out of bounds")
+        return 0
+    
+    if z_max > Z_tick[-1]:
+        print("Upper z limit out of bounds")
+        return 0
+    
     # Getting the arguments for the limits along x-axis
     cond_X1 = x_min <= X_tick
     cond_X2 = X_tick <= x_max

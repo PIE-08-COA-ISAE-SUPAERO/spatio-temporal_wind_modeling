@@ -9,7 +9,7 @@ Ninja's data and to extrapolate them to the required altitudes.
 import numpy as np
 import scipy.optimize as opt
 import scipy.interpolate as intp
-
+import warnings
 
 def get_Zlist_pos(x_pos,y_pos,points):
     """get_Zlist_pos.
@@ -248,6 +248,13 @@ def main(points,wind,points_surf,elev_max, step):
     Z_tick = get_Zlist_pos(X_tick[0], Y_tick[0], points)[1]
     Z_tick = np.extract(Z_tick>=0, Z_tick)
     Z_tick = np.round(Z_tick)
+    
+    # Checking elev_max
+    if elev_max < Z_tick[-1]:
+        warnings.warn("Elevation max for extrapolation below elevation max of Wind Ninja")
+    
+    if elev_max<0:
+        raise ValueError("Elevation max < 0m")
     
     # Wind field for each component
     U_field = np.array([X,Y,elev_wind[:,2],U])

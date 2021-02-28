@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Wind class
-
 This module contains the wind class and every function linked to it
-
 @author: PIE COA 08 (2020)
      Sébastien Laigret
      Loïc Roux
@@ -36,17 +34,23 @@ D_PRIN = 70.7
 PENTE_LATW = 11/6
 D_LATW = 188.4
 
+TIME_MAX = 900
+
+CORREC_GLOBAL = 1/3
+CORREC_ALTI = 0.1
+RATIO_PRIN = 0.11
+RATIO_LAT = 0.11
+RATIO_VERT = 0.06
+
 #%% The class
 class wind:
      
      def __init__(self):
           """
           The constructor of the class
-
           Returns
           -------
           None.
-
           """
           #Our cube with the position, wind speed and altitude of the surface
           self._wind_cube = {"Position" : [],
@@ -78,7 +82,6 @@ class wind:
 
      def __str__(self):
           """Overloading of the print function
-
           Returns
           -------
           String
@@ -101,12 +104,10 @@ class wind:
      def _convert2dico(self):
           """
           Convert the obhect into a dictionnary 
-
           Returns
           -------
           wind_cube : dict
                The object as a dictionnary.
-
           """
           #We need to convert into array the np-array
           wind_cube_temp = {}
@@ -132,14 +133,12 @@ class wind:
      
      def create_wind_cube(self, input_folder_path, simulation_folder_name):
           """Create the wind cube by launching the simulation
-
           Parameters
           ----------
           input_folder_path : String
               The folder where the input file (config_file : .json, .tif, and the wind file are stored)
           simulation_folder_name : String
               The name of the folder where the data is going to be stored in the DATA folder
-
           Returns
           -------
                flag :Bool
@@ -209,7 +208,6 @@ class wind:
 
      def import_wind_cube(self, file_name):
           """Import the data from a save file 
-
           Parameters
           ----------
           file_name : String
@@ -237,12 +235,10 @@ class wind:
      def export_wind_cube(self):
           """
           Create the .json file and stock it 
-
           Returns
           -------
           int
                1 if the file has correctly been exported.
-
           """
           name = self._folder_name + "/exported_data_" + self._date + ".json"
           with open(name, "w+") as f:
@@ -252,7 +248,6 @@ class wind:
                
      def get_data(self):
           """Return the dictionnary of the object
-
           Returns
           -------
           dict
@@ -263,7 +258,6 @@ class wind:
      def get_point(self, latitude, longitude, altitude):
           """
           Return the wind parameters at the specific position requested, with interpolation if needed
-
           Parameters
           ----------
           latitude : double
@@ -272,7 +266,6 @@ class wind:
                The longitude of the point wanted.
           altitude : double
                The altitude of the point wanted.
-
           Returns
           -------
           Tuple:
@@ -288,7 +281,6 @@ class wind:
                     The wind speed of the projection on the horizontal plan at the desired altitude
                direction : double 
                     The direction the wind came from, in ° 
-
           """
           #Get the distance the cube uses
           x_wanted, y_wanted = flat_distance_point((latitude, longitude), self._location)
@@ -385,12 +377,18 @@ class wind:
           
           u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, \
                                                                  longitude, altitude)
+          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, 10)
 
           fs = 10 # frequence sampling
           N = int(time * fs) # Max number of modes
           
           # Table of random Fourier coefficients
-          s_prin, s_late, s_w = 1, 1, 1 #
+          altitude_correction = max((CORREC_ALTI - 1)/(1000 - 0)*altitude + 1, CORREC_ALTI)
+          s_base = wind_10 * altitude_correction * CORREC_GLOBAL
+          s_prin = RATIO_PRIN * s_base
+          s_late = RATIO_LAT * s_base
+          s_w = RATIO_VERT * s_base 
+          
           wind_prin, wind_late, wind_w = wind_speed_flat, 0, w
           
           for k in range(N):
@@ -420,6 +418,7 @@ class wind:
           v = magnitude_plan * np.sin(direction_prov * np.pi/180)
           w = wind_w
           direction = direction_plan(u, v)  
+          
           # Plot of the windrose
           fig = plt.figure()
           ax = fig.add_subplot(111, projection="polar")
@@ -469,62 +468,72 @@ class wind:
           
           u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, \
                                                                  longitude, altitude)
-          
+          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, 10)
           fs = 1/timestep # frequence sampling
           TEMPS_MAX = 900 # observation of the profile during 15 minutes
           N = int(TEMPS_MAX * fs) # Max number of modes
           
           # Table of random Fourier coefficients
-          s_prin, s_late, s_w = 1, 1, 1 # to ponderate the impact of turbulence
+          # Table of random Fourier coefficients
           X_prin = []
           X_late = []
           X_w = []
-          
+            
+          # Ponderation of the impact of turbulence thanks to global coefficients
+          altitude_correction = max((CORREC_ALTI - 1)/(1000 - 0)*altitude + 1, CORREC_ALTI)
+          s_base = wind_10 * altitude_correction * CORREC_GLOBAL
+          s_prin = RATIO_PRIN * s_base
+          s_late = RATIO_LAT * s_base
+          s_w = RATIO_VERT * s_base 
+            
+            
           for k in range(N):
-               frequency = k/(2*N) * fs
-               s_prink = np.sqrt(TEMPS_MAX/(2*np.pi) * s_prin**2 * spectre_prin(frequency,\
+              frequency = k/(2*N) * fs
+              s_prink = np.sqrt(TIME_MAX/(2*np.pi) * s_prin**2 * spectre_prin(frequency,\
+                                                        wind_speed_flat, altitude))
+              s_latek = np.sqrt(TIME_MAX/(2*np.pi) * s_late**2 * spectre_late(frequency,\
                                                             wind_speed_flat, altitude))
-               s_latek = np.sqrt(TEMPS_MAX/(2*np.pi) * s_late**2 * spectre_late(frequency,\
+              s_wk = np.sqrt(TIME_MAX/(2*np.pi) * s_w**2 * spectre_w(frequency, \
                                                             wind_speed_flat, altitude))
-               s_wk = np.sqrt(TEMPS_MAX/(2*np.pi) * s_w**2 * spectre_w(frequency, \
-                                                            wind_speed_flat, altitude))
-               x_prin = rd.normal(0, s_prink)
-               x_late = rd.normal(0, s_latek)
-               x_w = rd.normal(0, s_wk)
-               X_prin.append(x_prin)
-               X_late.append(x_late)
-               X_w.append(x_w)
-          
-          # Computing the values of the wind in the time
-          list_time = []
+              x_prin = rd.normal(0, s_prink)
+              x_late = rd.normal(0, s_latek)
+              x_w = rd.normal(0, s_wk)
+              X_prin.append(x_prin)
+              X_late.append(x_late)
+              X_w.append(x_w)
+            
+          # Computing the values of the wind in the time by reverse FFT
+          list_time = [k * timestep for k in range(N)]
           list_prin = []
           list_late = []
+          list_w = []    
           list_u = []
           list_v = []
-          list_w = []
-          
-          for k in range(int(TEMPS_MAX/timestep)):
-               
-               t = k * timestep
-               wind_prin, wind_late, wind_w = wind_speed_flat, 0, w
-               for kk in range(N) :
-                    wind_prin = wind_prin + 2*np.pi*fs/N * X_prin[kk] * np.cos(2*np.pi*kk/N*t)
-                    wind_late = wind_late + 2*np.pi*fs/N * X_late[kk] * np.cos(2*np.pi*kk/N*t)
-                    wind_w = wind_w + 2*np.pi*fs/N * X_w[kk] * np.cos(2*np.pi*kk/N*t)
-               list_time.append(t)
-               list_prin.append(wind_prin)
-               list_late.append(wind_late)
-               list_w.append(wind_w)
-               magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)      
-               
-               direction_prin = 270 - direction_plan(wind_prin, wind_late)
-               direction_base = 270 - direction
-               direction_new = direction_base + direction_prin
-               u = magnitude_plan * np.cos(direction_new * np.pi/180)
-               v = magnitude_plan * np.sin(direction_new * np.pi/180)
-               
-               list_u.append(u)
-               list_v.append(v)  
+            
+          list_prin2 = np.fft.ifft(X_prin)
+          list_late2 = np.fft.ifft(X_late)
+          list_w2 = np.fft.ifft(X_w)
+        
+          for k in range(N) :
+                
+              wind_prin = wind_speed_flat + 2*np.pi * fs * list_prin2[k].real
+              wind_late = 0 + 2*np.pi * fs * list_late2[k].real
+              wind_w = w + 2*np.pi * fs * list_w2[k].real
+                
+              list_prin.append(wind_prin)
+              list_late.append(wind_late)
+              list_w.append(wind_w)
+                
+              magnitude_plan = np.sqrt(wind_prin**2 + wind_late**2)      
+                
+              direction_prin = 270 - direction_plan(wind_prin, wind_late)
+              direction_base = 270 - direction
+              direction_new = direction_base + direction_prin
+              u = magnitude_plan * np.cos(direction_new * np.pi/180)
+              v = magnitude_plan * np.sin(direction_new * np.pi/180)
+                
+              list_u.append(u)
+              list_v.append(v) 
                
           # Output as a graph of wind evolution in time
           plt.figure()
@@ -554,7 +563,6 @@ class wind:
      def plot_wind_surface(self, axis, coord, alt, plot):
           """
           Calculates a wind profile or a wind surface from the wind_cube.
-
           Parameters
           ----------
           axis : string
@@ -566,7 +574,6 @@ class wind:
                Altitude for the wind surface.
           plot : Bool
                Activates the plot option.
-
           Returns
           -------
           X_mesh : Narray of floats
@@ -590,7 +597,6 @@ class wind:
      def plot_wind_cube(self, xlim, ylim, zlim, plot):
           """
           Calculates a wind_cube inside the wind_cube and plots it if needed.
-
           Parameters
           ----------
           xlim : Narray of floats
@@ -618,7 +624,6 @@ class wind:
                3D-mesh for the interpolated wind speed component along z-axis.
           Sinterp : Narray of floats
                3D-mesh for the interpolated surface altitude.
-
           """
           return plots.plot_wind_cube(self._wind_cube, xlim, ylim, zlim, plot)
 
@@ -655,21 +660,18 @@ def smallest_interval(x, array):
 def flat_distance_point(point1, point2):
      """
      Compute the distance as a straight line between 2 geographical coordinates
-
      Parameters
      ----------
      point1 : tuple
           The latitude and longitude of the first point.
      point2 : tuple
           The latitude and longitude of the second point.
-
      Returns
      -------
      dx : double
           The distance over the x axis (along the east-west direction).
      dy : double
           The distance over the y axis (along the north-south direction).
-
      """
      
      (lat1, long1) = point1
@@ -760,14 +762,12 @@ def file_list_by_extension(file_dir, file_extension):
 
 def np_array_index(point, list_point):
      """Find the index of a np-array inside a 2D np-array
-
      Parameters
      ----------
      point : np-array
          the np-array to find 
      list_point : 2D np-array
          The 2D np-array where to find the point inside
-
      Returns
      -------
      Integer

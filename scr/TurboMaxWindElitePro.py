@@ -375,9 +375,21 @@ class wind:
                     The direction the wind came from, in ° 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, \
-                                                                 longitude, altitude)
-          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, 10)
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          
+          #We get the altitude of the selected geographical point
+          map_surface = [ [ self._wind_cube["Position"][i, 0], self._wind_cube["Position"][i, 1], self._wind_cube["Surface_altitude"][i] ] for i in range(self._nb_points)]
+          map_surface = np.array(map_surface)
+          x, y = flat_distance_point((latitude, longitude), self._location)
+
+          #Get the smallest cube (x,y) possible 
+          _, x_max = smallest_interval(x, self._list_point["x"])
+          _, y_max = smallest_interval(y, self._list_point["y"])
+
+          surface_alt = extrapolation.get_Zlist_pos(x_max, y_max, map_surface)[1]
+          surface_alt = np.unique(surface_alt)[0]
+
+          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, surface_alt + 10)
 
           fs = 10 # frequence sampling
           N = int(time * fs) # Max number of modes
@@ -466,9 +478,22 @@ class wind:
                     The evolution of the vertical wind speed 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, \
-                                                                 longitude, altitude)
-          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, 10)
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          
+          #We get the altitude of the selected geographical point
+          map_surface = [ [ self._wind_cube["Position"][i, 0], self._wind_cube["Position"][i, 1], self._wind_cube["Surface_altitude"][i] ] for i in range(self._nb_points)]
+          map_surface = np.array(map_surface)
+          x, y = flat_distance_point((latitude, longitude), self._location)
+
+          #Get the smallest cube (x,y) possible 
+          _, x_max = smallest_interval(x, self._list_point["x"])
+          _, y_max = smallest_interval(y, self._list_point["y"])
+
+          surface_alt = extrapolation.get_Zlist_pos(x_max, y_max, map_surface)[1]
+          surface_alt = np.unique(surface_alt)[0]
+
+          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, surface_alt + 10)
+          
           fs = 1/timestep # frequence sampling
           TEMPS_MAX = 900 # observation of the profile during 15 minutes
           N = int(TEMPS_MAX * fs) # Max number of modes

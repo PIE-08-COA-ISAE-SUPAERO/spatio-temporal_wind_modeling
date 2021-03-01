@@ -93,28 +93,22 @@ def get_interv(xlim,ylim,zlim):
     
     # Checking if limits inside the wind_cube boundaries
     if x_min < X_tick[0]:
-        print("Lower x limit out of bounds")
-        return 0
+        raise ValueError("Lower x limit out of bounds")
     
     if x_max > X_tick[-1]:
-        print("Upper x limit out of bounds")
-        return 0
+        raise ValueError("Upper x limit out of bounds")
     
     if y_min < Y_tick[0]:
-        print("Lower y limit out of bounds")
-        return 0
+        raise ValueError("Lower y limit out of bounds")
     
     if y_max > Y_tick[-1]:
-        print("Upper y limit out of bounds")
-        return 0
+        raise ValueError("Upper y limit out of bounds")
     
     if z_min < Z_tick[0]:
-        print("Lower z limit out of bounds")
-        return 0
+        raise ValueError("Lower z limit out of bounds")
     
     if z_max > Z_tick[-1]:
-        print("Upper z limit out of bounds")
-        return 0
+        raise ValueError("Upper z limit out of bounds")
     
     # Getting the arguments for the limits along x-axis
     cond_X1 = x_min <= X_tick
@@ -200,12 +194,16 @@ def get_interp_data(xlim, ylim, zlim, surf):
     # Calculating the ranges along each axis
     X_range, Y_range, Z_range = get_interv(xlim,ylim,zlim)
     
-    if len(X_range)>len(X_tick)/2: # More than half of the cube required
-        data_interp = data         # faster to use the whole domain
+    nb_points_required = len(X_range) * len(Y_range) * len(Z_range)
+    nb_points_cube = len(X_tick) * len(Y_tick) * len(Z_tick)
+    
+    if nb_points_required > nb_points_cube/2: 
+        # More than half of the cube required, faster to use the whole domain
+        data_interp = data         
     else:
         data_interp = [[]]
         
-        # Retrieving the lines of data that will be used in the interpoaltion
+        # Retrieving the lines of data that will be used in the interpolation
         for x_pos in X_range:
             for y_pos in Y_range:
                 for z_pos in Z_range:
@@ -262,6 +260,8 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, plot):
 
     Parameters
     ----------
+    wind_cube : Wind Cube
+        The Wind Cube to be interpolated
     xlim : Narray of floats
         Numpy array of size 2 containing the limits of the x-axis range.
     ylim : Narray of floats
@@ -333,13 +333,15 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
 
     Parameters
     ----------
+    wind_cube : Wind Cube
+        The Wind Cube to be interpolated
     axis : string
         Type of interpoltion to do. "z" for a wind surface, "x" or "y" for a
         wind profile.
     coord : Narry of float
         Coordinates of the point for the wind profile.
     alt : float
-        Altitude for the wind surface.
+        Altitude for the wind surface. Must be the atlitude above sea level.
     plot : Bool
         Activates the plot option.
 
@@ -412,7 +414,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
             plt.plot(Uinterp,Z_mesh,'b-o',label='U')
             plt.legend(fontsize=16)
             plt.xlabel('Vitesse algébrique (m/s)')
-            plt.ylabel('altitude (m)')
+            plt.ylabel('elevation a.g.l (m)')
             plt.grid(which='both')
             plt.title('Wind profile at x=%6.2fm y=%6.2fm' %(x,y))
             
@@ -421,7 +423,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
             plt.plot(Vinterp,Z_mesh,'g-o',label='V')
             plt.legend(fontsize=16)
             plt.xlabel('Vitesse algébrique (m/s)')
-            plt.ylabel('altitude (m)')
+            plt.ylabel('elevation a.g.l (m)')
             plt.grid(which='both')
             plt.title('Wind profile at x=%6.2fm y=%6.2fm' %(x,y))
             
@@ -430,7 +432,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
             plt.plot(Winterp,Z_mesh,'r-o',label='W')
             plt.legend(fontsize=16)
             plt.xlabel('Vitesse algébrique (m/s)')
-            plt.ylabel('altitude (m)')
+            plt.ylabel('elevation a.g.l (m)')
             plt.grid(which='both')
             plt.title('Wind profile at x=%6.2fm y=%6.2fm' %(x,y))
             
@@ -439,7 +441,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
             plt.plot(Norm,Z_mesh,'m-o',label='W')
             plt.legend(fontsize=16)
             plt.xlabel('Norme (m/s)')
-            plt.ylabel('altitude (m)')
+            plt.ylabel('elevation a.g.l (m)')
             plt.grid(which='both')
             plt.title('Wind profile at x=%6.2fm y=%6.2fm' %(x,y))
 
@@ -448,6 +450,9 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
     else:
         # Wind surface
         if axis == "z":
+            # Checking altitude inside bounds
+            if alt < min(Zsurf) or alt > max(Zsurf):
+                raise ValueError("Altitude out of bounds")
             # Creating the limit arrays
             xlim = np.array([X_tick[0], X_tick[-1]])
             ylim = np.array([Y_tick[0], Y_tick[-1]])

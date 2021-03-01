@@ -9,7 +9,7 @@ Ninja's data and to extrapolate them to the required altitudes.
 import numpy as np
 import scipy.optimize as opt
 import scipy.interpolate as intp
-import warnings
+
 
 def get_Zlist_pos(x_pos,y_pos,points):
     """get_Zlist_pos.
@@ -178,7 +178,7 @@ def get_extrap_law(Z,wind,law):
     # Error indicators.
     r2_new = np.inf  
     r2_old = np.inf
-    while len(Vextrap_points)>5 and success == False:  # Minimum of 5 points to do the fitting.
+    while len(Vextrap_points)>1 and success == False:  # Minimum of 2 points to do the fitting.
         try:
             # Fitting of the law to the selected data points.
             best_val, covar = opt.curve_fit(law, Zextrap_points, Vextrap_points, p0=[2.5,0.128])
@@ -249,13 +249,6 @@ def main(points,wind,points_surf,elev_max, step):
     Z_tick = np.extract(Z_tick>=0, Z_tick)
     Z_tick = np.round(Z_tick)
     
-    # Checking elev_max
-    if elev_max < Z_tick[-1]:
-        warnings.warn("Elevation max for extrapolation below elevation max of Wind Ninja")
-    
-    if elev_max<0:
-        raise ValueError("Elevation max < 0m")
-    
     # Wind field for each component
     U_field = np.array([X,Y,elev_wind[:,2],U])
     U_field = np.transpose(U_field)
@@ -316,7 +309,7 @@ def main(points,wind,points_surf,elev_max, step):
             
             # Extrapolation of the different fields
             Z_pos_extrap = np.linspace(Z_tick[-1],elev_max,step)
-            Z_pos_extrap = Z_pos_extrap[1:]  # Removing last point of Wind Ninja
+            Z_pos_extrap = Z_pos_extrap[1:]
             param_pow = get_extrap_law(Z_tick,U_pos,power_law)[2]
             U_pos_extrap = power_law(Z_pos_extrap,param_pow[0], param_pow[1])
             

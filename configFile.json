@@ -3,7 +3,8 @@
 		"name":"Missoula Valley",
 		"latitude":46.8787176,
 		"longitude":-113.996586,
-		"mntFile":false
+		"mntFile":false,
+		"gribFile":false
 	},
 	"period":{
 		"start":"02-02-2021_13-15",

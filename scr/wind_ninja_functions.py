@@ -55,17 +55,12 @@ def main(input_path: str, simu_name: str):
     json_path: str = simu_path + '/' + json_file
     with open(json_path) as f:
         config_text = json.load(f)
-
         mnt_file = config_text['location']['mntFile']
         grib_file = config_text['location']['gribFile']
         for simu_id in range(len(config_text['windNinjaSimulations'])):
             chosen_simu = config_text['windNinjaSimulations'][simu_id]['name']
             if chosen_simu == simu_name:
                 wind_ninja_simulation = config_text['windNinjaSimulations'][simu_id]
-        config_data = [mnt_file, wind_ninja_simulation]
-
-    print(config_data)
-    print(wind_ninja_simulation.keys())
 
     # Verify if the terrain file .tif exist
     if mnt_file is True:
@@ -76,7 +71,7 @@ def main(input_path: str, simu_name: str):
         else:
             tif_file: str = tif_files[0]
             shutil.copyfile(input_path + tif_file,
-                            simu_path + '/' + tif_file)  # os.system("cp " + tif_file + ' ' + simu_path)
+                            simu_path + '/' + tif_file)
 
     if grib_file is True:
         # Verify if the wind file .??? exist
@@ -87,24 +82,33 @@ def main(input_path: str, simu_name: str):
         else:
             wind_file: str = wind_files[0]
             shutil.copyfile(input_path + wind_file,
-                            simu_path + '/' + wind_file)  # os.system("cp " + wind_file + ' ' + simu_path)
+                            simu_path + '/' + wind_file)
 
     # Write the .cfg
-    cfg_name = simu_path + '/cli_' + simu_name + '.cfg'
-    cfg_file = open(file=cfg_name, mode='w+')
+    cfg_path = simu_path + '/' + simu_name + '.cfg'
+    cfg_file = open(file=cfg_path, mode='w+')
     for param_key, param_values in wind_ninja_simulation.items():
-        cfg_file.write(param_key + '=' + str(param_values) + '\n')
+        if param_key != 'name':
+            cfg_file.write(param_key + '=' + str(param_values) + '\n')
 
     # Create the output folder
-    os.mkdir(simu_path + '/output')
     output_path = simu_path + '/output'
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
+
 
     ## lance windninja et assur que les output .vtk et .pdf vont être dans le dossier simuName
 
-    call_WindNinja = "C:\\WindNinja\\WindNinja-3.5.3\\bin\\WindNinja_cli " + cfg_name + " --output_path " + output_path
-    print(call_WindNinja)
-    os.system(call_WindNinja)
+    windNinja_command: str = "C:\\WindNinja\\WindNinja-3.5.3\\bin\\WindNinja_cli " + cfg_path + " --output_path " + output_path
+    print(windNinja_command)
+    os.system(windNinja_command)
+
+    # from subprocess import check_call
+    # d = "/home/pi/Downloads/beep"
+    # os.mkdir(d)
+    # check_call(["C:\\WindNinja\\WindNinja-3.5.3\\bin\\WindNinja_cli", cfg_path, "--output_path", output_path])
+    # timeoutSeconds = 10
+    # import subprocess
+    # subprocess.check_output(windNinja_command, shell=True, timeout=timeoutSeconds)
 
     return True
-
-

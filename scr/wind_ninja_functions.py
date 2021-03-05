@@ -28,7 +28,7 @@ def main(input_path: str, simu_name: str):
         ATTENTION
         ---------
         Make sure that there is the WindNinja adress
-        C:\\WindNinja\\WindNinja-3.5.3\\bin\\WindNinja_cli
+        C:\\WindNinja\\WindNinja-3.7.1\\bin\\WindNinja_cli
         """
     import os, json, shutil
 
@@ -56,12 +56,12 @@ def main(input_path: str, simu_name: str):
     else:
         json_file: str = json_files_[0]
 
-    shutil.copyfile(input_path + json_file, simu_path + '/' + json_file)
-    json_path: str = simu_path + '/' + json_file
+    shutil.copyfile(input_path + json_file, simu_path + '/' + simu_name + '.json')
+    json_path: str = simu_path + '/' + simu_name + '.json'
     with open(json_path) as f:
         config_text = json.load(f)
-        mnt_file = config_text['location']['mntFile']
-        grib_file = config_text['location']['gribFile']
+        mnt_file: bool = config_text['location']['mntFile']
+        grib_file: bool = config_text['location']['gribFile']
         for simu_id in range(len(config_text['windNinjaSimulations'])):
             chosen_simu = config_text['windNinjaSimulations'][simu_id]['name']
             if chosen_simu == simu_name:
@@ -97,6 +97,8 @@ def main(input_path: str, simu_name: str):
         if param_key != 'name':
             cfg_file.write(param_key + '=' + str(param_values) + '\n')
 
+
+
     # Create the output folder
     output_path = simu_path + '/output'
     if not os.path.exists(output_path):
@@ -104,7 +106,7 @@ def main(input_path: str, simu_name: str):
 
     # Call the WindNinja_cli and call him in prompt command ligne
     # The outputs will be on the output_path
-    windNinja_path = "C:\\WindNinja\\WindNinja-3.5.3\\bin\\WindNinja_cli"
+    windNinja_path = "C:\\WindNinja\\WindNinja-3.7.1\\bin\\WindNinja_cli"
     windNinja_command: str = windNinja_path + " " + cfg_path + " --output_path " + output_path
     os.popen(windNinja_command)
 

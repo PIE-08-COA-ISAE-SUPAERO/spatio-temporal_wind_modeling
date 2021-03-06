@@ -255,9 +255,9 @@ class wind:
           """          
           return self._convert2dico()
      
-     def get_point(self, latitude, longitude, altitude):
+     def get_point(self, latitude, longitude, altitude, plot = True):
           """
-          Return the wind parameters at the specific position requested, with interpolation if needed
+          Return the wind parameters at the specific position requested, with interpolation if needed and plot a wind rose if wished
           Parameters
           ----------
           latitude : double
@@ -266,6 +266,8 @@ class wind:
                The longitude of the point wanted.
           altitude : double
                The altitude of the point wanted.
+          plot : boolean
+               If the wind rose is to be plotted
           Returns
           -------
           Tuple:
@@ -342,12 +344,29 @@ class wind:
           #Compute the wind speeds and direction
           wind_speed = np.sqrt(u**2 + v**2 + w**2)
           wind_speed_flat = np.sqrt(u**2 + v**2)
+          direction = direction_plan(u, v)
           
-          return u, v, w, wind_speed, wind_speed_flat, direction_plan(u, v)
+          if plot :
+               # Plot of the windrose
+               fig = plt.figure()
+               ax = fig.add_subplot(111, projection="polar")
+               title = "Windrose (" + str(round(latitude,2)) + "°," + str(round(longitude,2)) + "°) : " + str(round(wind_speed_flat,1)) + " m/s, " + str(round(direction,1)) + "°"
+               ax.set_title(title)
+               ax.set_rmin(0)
+               ax.set_rmax(max(25,wind_speed_flat + 5))
+               ax.set_thetalim(0, 2*np.pi)
+               ax.set_theta_direction(-1)
+               ax.set_theta_zero_location("N")
+               plt.arrow(direction*np.pi/180, wind_speed_flat + 0.5, 0, -wind_speed_flat, \
+                         width = 0.1, lw = 1, length_includes_head = True, head_width=1, \
+                              head_length=3, shape = "full", overhang = 0.5)
+               plt.show()
+          
+          return u, v, w, wind_speed, wind_speed_flat, direction
 
-     def turbulence(self, latitude, longitude, altitude, time):
+     def turbulence(self, latitude, longitude, altitude, time, plot = True):
           """
-          Return the wind parameters at the specific position requested with a random turbulence component
+          Return the wind parameters at the specific position requested with a random turbulence component  and plot a wind rose if wished
           Parameters
           ----------
           latitude : double
@@ -357,7 +376,9 @@ class wind:
           altitude : double
                The altitude of the point wanted.
           time : double
-               The relative time (seconds) since the initial time    
+               The relative time (seconds) since the initial time 
+          plot : boolean
+               If the wind rose is to be plotted   
           Returns
           -------
           Tuple:
@@ -431,20 +452,22 @@ class wind:
           w = wind_w
           direction = direction_plan(u, v)  
           
-          # Plot of the windrose
-          fig = plt.figure()
-          ax = fig.add_subplot(111, projection="polar")
-          title = "Windrose (" + str(round(latitude,2)) + "°," + str(round(longitude,2)) + "°) : " + str(round(magnitude_plan,1)) + " m/s, " + str(round(direction,1)) + "°"
-          ax.set_title(title)
-          ax.set_rmin(0)
-          ax.set_rmax(max(25,magnitude_plan + 5))
-          ax.set_thetalim(0, 2*np.pi)
-          ax.set_theta_direction(-1)
-          ax.set_theta_zero_location("N")
-          plt.arrow(direction*np.pi/180, magnitude_plan + 0.5, 0, -magnitude_plan, \
-                    width = 0.1, lw = 1, length_includes_head = True, head_width=1, \
-                         head_length=3, shape = "full", overhang = 0.5)
-          plt.show()
+          if plot :
+               # Plot of the windrose
+               fig = plt.figure()
+               ax = fig.add_subplot(111, projection="polar")
+               title = "Windrose (" + str(round(latitude,2)) + "°," + str(round(longitude,2)) + "°) : " + str(round(magnitude_plan,1)) + " m/s, " + str(round(direction,1)) + "°"
+               ax.set_title(title)
+               ax.set_rmin(0)
+               ax.set_rmax(max(25,magnitude_plan + 5))
+               ax.set_thetalim(0, 2*np.pi)
+               ax.set_theta_direction(-1)
+               ax.set_theta_zero_location("N")
+               plt.arrow(direction*np.pi/180, magnitude_plan + 0.5, 0, -magnitude_plan, \
+                         width = 0.1, lw = 1, length_includes_head = True, head_width=1, \
+                              head_length=3, shape = "full", overhang = 0.5)
+               plt.show()
+               
           return(u, v, w, magnitude, magnitude_plan, direction)
 
 

@@ -267,7 +267,7 @@ class wind:
           altitude : double
                The altitude of the point wanted.
           plot : boolean
-               If the wind rose is to be plotted
+               Activates the plot option.
           Returns
           -------
           Tuple:
@@ -378,7 +378,7 @@ class wind:
           time : double
                The relative time (seconds) since the initial time 
           plot : boolean
-               If the wind rose is to be plotted   
+               Activates the plot option.   
           Returns
           -------
           Tuple:
@@ -467,11 +467,11 @@ class wind:
                          width = 0.1, lw = 1, length_includes_head = True, head_width=1, \
                               head_length=3, shape = "full", overhang = 0.5)
                plt.show()
-               
+
           return(u, v, w, magnitude, magnitude_plan, direction)
 
 
-     def profil_turbulence(self, latitude, longitude, altitude, timestep):
+     def profil_turbulence(self, latitude, longitude, altitude, timestep, plot = True):
           """
           Return the evolution of the speed of the wind at a specific point during 15 minutes
           Parameters
@@ -483,7 +483,9 @@ class wind:
           altitude : double
                The altitude of the point wanted.
           timestep : double
-               The time step (in seconds) between each value of the wind    
+               The time step (in seconds) between each value of the wind 
+          plot : boolean
+               Activates the plot option.   
           Returns
           -------
           Tuple:
@@ -583,27 +585,28 @@ class wind:
               list_u.append(u)
               list_v.append(v) 
                
-          # Output as a graph of wind evolution in time
-          plt.figure()
-          plt.plot(list_time, list_prin, label = "Principal wind $\\bar{U}+\\tilde{u}$")
-          plt.plot(list_time, list_late, label = "Lateral wind $\\tilde{v}$")
-          plt.plot(list_time, list_w, label = "Vertical wind $\\bar{W}+\\tilde{w}$")
-          plt.xlabel("Time (s)")
-          plt.ylabel("Speed of the wind (m/s)")
-          plt.title("Evolution in time of the wind speed")
-          plt.grid()
-          plt.legend()
-          plt.show()
-          plt.figure()
-          plt.plot(list_time, list_u, label = "West/East wind $U_x$")
-          plt.plot(list_time, list_v, label = "South/North wind $U_y$")
-          plt.plot(list_time, list_w, label = "Vertical wind $U_z$")
-          plt.xlabel("Time (s)")
-          plt.ylabel("Speed of the wind (m/s)")
-          plt.title("Evolution in time of the wind speed")
-          plt.grid()
-          plt.legend()
-          plt.show()
+          if plot :
+               # Output as a graph of wind evolution in time
+               plt.figure()
+               plt.plot(list_time, list_prin, label = "Principal wind $\\bar{U}+\\tilde{u}$")
+               plt.plot(list_time, list_late, label = "Lateral wind $\\tilde{v}$")
+               plt.plot(list_time, list_w, label = "Vertical wind $\\bar{W}+\\tilde{w}$")
+               plt.xlabel("Time (s)")
+               plt.ylabel("Speed of the wind (m/s)")
+               plt.title("Evolution in time of the wind speed")
+               plt.grid()
+               plt.legend()
+               plt.show()
+               plt.figure()
+               plt.plot(list_time, list_u, label = "West/East wind $U_x$")
+               plt.plot(list_time, list_v, label = "South/North wind $U_y$")
+               plt.plot(list_time, list_w, label = "Vertical wind $U_z$")
+               plt.xlabel("Time (s)")
+               plt.ylabel("Speed of the wind (m/s)")
+               plt.title("Evolution in time of the wind speed")
+               plt.grid()
+               plt.legend()
+               plt.show()
           
           # Output as the data computed for prediction
           return(list_time, list_prin, list_late, list_u, list_v, list_w)

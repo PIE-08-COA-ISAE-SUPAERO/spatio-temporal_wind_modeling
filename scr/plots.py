@@ -15,6 +15,28 @@ from scipy.interpolate import LinearNDInterpolator
 import extrapolation as interp
 
 #%% Cube de vent
+def get_surf():
+    """
+    Create the arrays for the surface plot.
+
+    Returns
+    -------
+    X_surf : Narray of float
+        Meshgrid for x-axis.
+    Y_surf : Narray of float
+        Meshgrid for y-axis.
+    Surf : Narray of float
+        Surface altitude grid.
+
+    """
+    Surf = np.zeros((len(Y_tick),len(X_tick)))
+    X_surf, Y_surf = np.meshgrid(X_tick,Y_tick)
+    
+    for i in range(len(X_tick)):
+        for j in range(len(Y_tick)):
+            zpos = np.min(interp.get_Zlist_pos(X_tick[i], Y_tick[j], np.concatenate((data[:,0:2],np.reshape(Zsurf,(len(Zsurf),1))),axis=1))[1])
+            Surf[j,i] = zpos;
+    return X_surf, Y_surf, Surf
 
 def get_tick_argminmax(cond_min,cond_max):
     """
@@ -82,7 +104,6 @@ def get_interv(xlim,ylim,zlim):
         interpolation domain.
 
     """
-    
     # Retrieving the min and the max values along each axis
     x_min = xlim[0]
     x_max = xlim[1]
@@ -149,10 +170,10 @@ def get_interv(xlim,ylim,zlim):
     return X_range, Y_range, Z_range
 
 
-def get_interp_data(xlim, ylim, zlim, surf):
+def get_interp_data(xlim, ylim, zlim, nb_points, surf):
     """
     
-    Calculates an interpolation from the wind_cube data to a defined domain.
+    Calculate an interpolation from the wind_cube data to a defined domain.
 
     Parameters
     ----------
@@ -162,6 +183,8 @@ def get_interp_data(xlim, ylim, zlim, surf):
         Numpy array of size 2 containing the limits of the y-axis range.
     zlim : Narray of floats
         Numpy array of size 2 containing the limits of the z-axis range.
+    nb_points : int
+        Number of output points along x and y axes
     surf : Boolean
         True if calculation of a wind_surface
 
@@ -182,8 +205,7 @@ def get_interp_data(xlim, ylim, zlim, surf):
     Sinterp : Narray of floats
         3D-mesh for the interpolated surface altitude.
 
-    """
-    
+    """  
     # Case of a wind surface
     if surf == True:
         z_elev_range = np.ones(len(data[:,6]))*zlim[0] - data[:,6]  # from alt to elevation range
@@ -224,8 +246,8 @@ def get_interp_data(xlim, ylim, zlim, surf):
                             data_interp = np.append(data_interp,data[k,:], 0)
     
     # Defined horizontal ranges for the interpolation
-    X_interp = np.linspace(xlim[0],xlim[1],10)
-    Y_interp = np.linspace(ylim[0],ylim[1],10)
+    X_interp = np.linspace(xlim[0],xlim[1],nb_points)
+    Y_interp = np.linspace(ylim[0],ylim[1],nb_points)
     
     # Vertical range for the interpolation
     if surf==True:
@@ -253,23 +275,25 @@ def get_interp_data(xlim, ylim, zlim, surf):
 
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp
 
-def plot_wind_cube(wind_cube, xlim, ylim, zlim, plot):
+def plot_wind_cube(wind_cube, xlim, ylim, zlim, nb_points=10, plot=False):
     """
     
-    Calculates a wind_cube inside the wind_cube and plots it if needed.
+    Calculate a wind_cube inside the wind_cube and plots it if needed.
 
     Parameters
     ----------
-    wind_cube : Wind Cube
-        The Wind Cube to be interpolated
+    wind_cube : wind_cube
+        The wind cube on which the interpolation will be done.
     xlim : Narray of floats
         Numpy array of size 2 containing the limits of the x-axis range.
     ylim : Narray of floats
         Numpy array of size 2 containing the limits of the y-axis range.
     zlim : Narray of floats
         Numpy array of size 2 containing the limits of the z-axis range.
-    plot : Bool
-        Activates the plot or not.
+    nb_points(optional) : int
+        Number of output points along x and y axes. Default = 10.
+    plot(optional) : Bool
+        Activates the plot option. Default = False.
         
     Returns
     -------
@@ -311,14 +335,17 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, plot):
     Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
     
     # Interpolation
-    X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim,ylim,zlim,False)
+    X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim,ylim,zlim,nb_points,False)
     
     # Plotting the wind-cube if required
     if plot == True:
+
+        X_surf, Y_surf, Surf = get_surf()
+
         fig = plt.figure(figsize=(16,12)) 
         ax = fig.gca(projection='3d') 
         ax.quiver(X_mesh, Y_mesh, Z_mesh+Sinterp, Uinterp, Vinterp, Winterp, length=max(X_mesh[0,:,0])/400) 
-        ax.plot_surface(X_mesh[:,:,0],Y_mesh[:,:,0], Sinterp[:,:,0],color="#FBEEE6")
+        ax.plot_surface(X_surf,Y_surf, Surf,color="#FBEEE6")
         plt.ion()
         plt.xlabel('x (m)')
         plt.ylabel('y (m)')
@@ -326,24 +353,26 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, plot):
         
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp
 
-def plot_wind_surface(wind_cube, axis, coord, alt, plot):
+def plot_wind_surface(wind_cube, axis, coord, alt, nb_points=10, plot=False):
     """
     
-    Calculates a wind profile or a wind surface from the wind_cube.
+    Calculate a wind profile or a wind surface from the wind_cube.
 
     Parameters
     ----------
-    wind_cube : Wind Cube
-        The Wind Cube to be interpolated
+    wind_cube : wind_cube
+        The wind cube on which the interpolation will be done.
     axis : string
         Type of interpoltion to do. "z" for a wind surface, "x" or "y" for a
         wind profile.
     coord : Narry of float
         Coordinates of the point for the wind profile.
     alt : float
-        Altitude for the wind surface. Must be the atlitude above sea level.
-    plot : Bool
-        Activates the plot option.
+        Altitude for the wind surface. Must be the altitude above sea level.
+    nb_points(optional) : int
+        Number of output points along x and y axes. Default = 10.
+    plot(optional) : Bool
+        Activates the plot option. Default = False.
 
     Returns
     -------
@@ -488,28 +517,19 @@ def plot_wind_surface(wind_cube, axis, coord, alt, plot):
             # Plot if required
             if plot == True:
                 
+                X_surf, Y_surf, Surf = get_surf()
+
                 plt.figure(figsize=(14,12))
                 # wind surface
                 plt.quiver(X, Y, U, V, M, pivot='mid', units='xy')
                 plt.colorbar()
                 #iso-altitude contours
-                plt.scatter(X, Y, color='r', s=10)
-                CS = plt.contour(X_mesh[:,:,0], Y_mesh[:,:,0], Sinterp[:,:,0], colors='black')
+                plt.scatter(X, Y, color='r', s=5)
+                CS = plt.contour(X_surf, Y_surf, Surf, colors='black')
                 plt.clabel(CS, inline=1, fontsize=10, fmt='%1.f')
                 plt.title('Wind plot at altitude %im a.s.l (m/s)' %alt)
                 plt.xlabel('x (m)')
                 plt.ylabel('y (m)')
                 plt.grid()
-
                 plt.show()
-            
-    return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp
-
-#%% Test
-#xlim = np.array([X_tick[0], X_tick[-1]])
-#ylim = np.array([Y_tick[0], Y_tick[-1]])
-#zlim = np.array([Z_tick[0], Z_tick[-1]])
-
-#X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = plot_wind_cube(xlim, ylim, zlim, True)
-
-#X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp = plot_wind_surface("z", [X_tick[0], Y_tick[0]], 1400, True)
+    return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp

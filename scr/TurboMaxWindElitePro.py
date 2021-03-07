@@ -611,7 +611,7 @@ class wind:
           # Output as the data computed for prediction
           return(list_time, list_prin, list_late, list_u, list_v, list_w)
 
-     def plot_wind_surface(self, axis, coord, alt, plot):
+     def plot_wind_surface(self, axis, coord, alt, nb_points=10, plot=False):
           """
           Calculates a wind profile or a wind surface from the wind_cube.
           Parameters
@@ -623,8 +623,10 @@ class wind:
                Coordinates of the point for the wind profile.
           alt : float
                Altitude for the wind surface.
+          nb_points : int
+               Number of output points along x and y axes. Default = 10.
           plot : Bool
-               Activates the plot option.
+               Activates the plot option. Default = False.
           Returns
           -------
           X_mesh : Narray of floats
@@ -643,9 +645,9 @@ class wind:
                3D-mesh for the interpolated surface altitude.
           """
           coordxy_tuple = flat_distance_point(self._location, coord)
-          return plots.plot_wind_surface(self._wind_cube, axis, [coordxy_tuple[0],coordxy_tuple[1]], alt, plot)
+          return plots.plot_wind_surface(self._wind_cube, axis, [coordxy_tuple[0],coordxy_tuple[1]], alt, nb_points, plot)
      
-     def plot_wind_cube(self, xlim, ylim, zlim, plot):
+     def plot_wind_cube(self, xlim, ylim, zlim, nb_points=10, plot=False):
           """
           Calculates a wind_cube inside the wind_cube and plots it if needed.
           Parameters
@@ -656,8 +658,10 @@ class wind:
                Numpy array of size 2 containing the limits of the y-axis range.
           zlim : Narray of floats
                Numpy array of size 2 containing the limits of the z-axis range.
-          plot : Bool
-               Activates the plot or not.
+          nb_points(optional) : int
+               Number of output points along x and y axes. Default = 10.
+          plot(optional) : Bool
+               Activates the plot option. Default = False.
                
           Returns
           -------
@@ -676,7 +680,7 @@ class wind:
           Sinterp : Narray of floats
                3D-mesh for the interpolated surface altitude.
           """
-          return plots.plot_wind_cube(self._wind_cube, xlim, ylim, zlim, plot)
+          return plots.plot_wind_cube(self._wind_cube, xlim, ylim, zlim, nb_points, plot)
 
 #---------------------------------------------------------
 # #%% AUXILIARY

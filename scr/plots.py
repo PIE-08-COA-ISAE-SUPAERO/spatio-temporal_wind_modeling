@@ -35,7 +35,7 @@ def get_surf():
     for i in range(len(X_tick)):
         for j in range(len(Y_tick)):
             zpos = np.min(interp.get_Zlist_pos(X_tick[i], Y_tick[j], np.concatenate((data[:,0:2],np.reshape(Zsurf,(len(Zsurf),1))),axis=1))[1])
-            Surf[j,i] = zpos;
+            Surf[j,i] = zpos
     return X_surf, Y_surf, Surf
 
 def get_tick_argminmax(cond_min,cond_max):
@@ -275,7 +275,7 @@ def get_interp_data(xlim, ylim, zlim, nb_points, surf):
 
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp
 
-def plot_wind_cube(wind_cube, xlim, ylim, zlim, nb_points=10, plot=False):
+def plot_wind_cube(wind_cube, xlim, ylim, zlim, nb_points, plot):
     """
     
     Calculate a wind_cube inside the wind_cube and plots it if needed.
@@ -290,9 +290,9 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, nb_points=10, plot=False):
         Numpy array of size 2 containing the limits of the y-axis range.
     zlim : Narray of floats
         Numpy array of size 2 containing the limits of the z-axis range.
-    nb_points(optional) : int
+    nb_points : int
         Number of output points along x and y axes. Default = 10.
-    plot(optional) : Bool
+    plot : Bool
         Activates the plot option. Default = False.
         
     Returns
@@ -353,7 +353,7 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, nb_points=10, plot=False):
         
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp
 
-def plot_wind_surface(wind_cube, axis, coord, alt, nb_points=10, plot=False):
+def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
     """
     
     Calculate a wind profile or a wind surface from the wind_cube.
@@ -369,9 +369,9 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points=10, plot=False):
         Coordinates of the point for the wind profile.
     alt : float
         Altitude for the wind surface. Must be the altitude above sea level.
-    nb_points(optional) : int
+    nb_points : int
         Number of output points along x and y axes. Default = 10.
-    plot(optional) : Bool
+    plot : Bool
         Activates the plot option. Default = False.
 
     Returns
@@ -425,7 +425,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points=10, plot=False):
         zlim = np.array([Z_tick[0], alt])
         
         # Interpolation
-        X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim,ylim,zlim, False)
+        X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim, ylim, zlim, nb_points, False)
         
         # Resizing the result meshes
         Z_mesh =Z_mesh[0,0,:]
@@ -488,7 +488,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points=10, plot=False):
             zlim = np.array([alt,alt])
             
             # Interpolation
-            X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim,ylim,zlim, True)
+            X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim,ylim,zlim, nb_points, True)
             
             # Retrieving the position of the points at the required altitude
             select = np.argwhere(np.round(Sinterp+Z_mesh)==alt)

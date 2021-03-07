@@ -1,40 +1,59 @@
 {
 	"location":{
-		"name":"Missoula Valley",
-		"latitude":46.8787176,
-		"longitude":-113.996586,
+		"name":"LesNoisetiers",
+		"latitude":48.1498753,
+		"longitude":0.3560498,
+		"z_from":30,
+		"z_to":60,
 		"mntFile":false,
 		"gribFile":false
-	},
-	"period":{
-		"start":"02-02-2021_13-15",
-		"end":"02-02-2021_15-00"		
 	},
 	"extrapolation":{
 		"nb_layer_extrapolation": 5,
 		"elevation_max":5.0
 	},
-	"windNinjaSimulations":[	
+	"windNinjaSimulations":[
 		{
-			"name":"domainAverage",
+			"name":"momentumSolver",
+
 			"num_threads":1,
-			"elevation_file":"missoula_valley.tif",
-			"initialization_method":"domainAverageInitialization",
-			"input_speed":"10.0",
-			"input_speed_units":"mph",
-			"input_direction":270.0,
-			"input_wind_height":20.0,
-			"units_input_wind_height":"ft",
-			"output_wind_height":20.0,
-			"units_output_wind_height":"ft",
-			"vegetation":"trees",
+
+			"x_center": 48.1498753,
+			"y_center": 0.3560498,
+			"x_buffer":10,
+			"y_buffer":10,
+			"buffer_units":"km",
+			"elevation_source":"world_srtm",
+
 			"mesh_choice":"coarse",
-			"write_goog_output":true,
-			"write_shapefile_output":true,
-			"write_ascii_output":true,
-			"ascii_out_resolution":200.0,
-			"units_ascii_out_resolution":"m",
-			"write_farsite_atm":true
+			"mesh_resolution":500,
+			"units_mesh_resolution":"m",
+
+			"time_zone":"Europe/Paris",
+			"year": 2021,
+			"month": 3,
+			"day": 5,
+			"hour": 7,
+			"minute": 0,
+
+			"diurnal_winds":false,
+
+			"non_neutral_stability":false,
+
+			"initialization_method":"wxModelInitialization",
+			"wx_model_type":"NOMADS-GFS-GLOBAL-0.25-DEG",
+			"forecast_duration":3,
+
+			"vegetation":"grass",
+
+			"momentum_solver":true,
+			"number_of_iterations":300,
+
+			"output_speed_units":"kts",
+			"output_wind_height":30.0,
+			"units_output_wind_height":"m",
+			"write_pdf_output":true,
+			"write_vtk_output":true
 		}
-	]	
+	]
 }

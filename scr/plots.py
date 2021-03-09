@@ -369,6 +369,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
         Coordinates of the point for the wind profile.
     alt : float
         Altitude for the wind surface. Must be the altitude above sea level.
+        If wind profile required, elevation above ground max for the plot. 
     nb_points : int
         Number of output points along x and y axes. Default = 10.
     plot : Bool
@@ -423,7 +424,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
         # Creating the limit arrays
         xlim = np.array([x,x])
         ylim = np.array([y,y])
-        zlim = np.array([Z_tick[0], alt])
+        zlim = np.array([Z_tick[0], alt)
         
         # Interpolation
         X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim, ylim, zlim, nb_points, False)

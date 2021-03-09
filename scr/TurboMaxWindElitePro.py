@@ -650,7 +650,8 @@ class wind:
           coord : Narray of float
                Coordinates of the point for the wind profile.
           alt : float
-               Altitude for the wind surface.
+               Altitude for the wind surface. Must be the altitude above sea level.
+               If wind profile required, elevation above ground max for the plot. 
           nb_points : int
                Number of output points along x and y axes. Default = 10.
           plot : Bool

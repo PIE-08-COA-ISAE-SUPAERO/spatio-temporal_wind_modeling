@@ -262,7 +262,7 @@ class wind:
           """          
           return self._convert2dico()
      
-     def get_point(self, latitude, longitude, altitude, plot = True):
+     def get_point(self, latitude, longitude, elevation = 0, altitude = 0, plot = True):
           """
           Return the wind parameters at the specific position requested, with interpolation if needed and plot a wind rose if wished
           Parameters

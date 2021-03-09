@@ -15,9 +15,16 @@ from scipy.interpolate import LinearNDInterpolator
 import extrapolation as interp
 
 #%% Cube de vent
-def get_surf():
+def get_surf(X_range, Y_range):
     """
     Create the arrays for the surface plot.
+    
+    Parameters
+    ----------
+    X_range : Narray of float
+        Range along x_axis for the surface.
+    Y_range : Narray of float
+        Range along z axis for the surface.
 
     Returns
     -------
@@ -29,13 +36,13 @@ def get_surf():
         Surface altitude grid.
 
     """
-    Surf = np.zeros((len(Y_tick),len(X_tick)))
-    X_surf, Y_surf = np.meshgrid(X_tick,Y_tick)
+    Surf = np.zeros((len(Y_range),len(X_range)))
+    X_surf, Y_surf = np.meshgrid(X_range,Y_range)
     
-    for i in range(len(X_tick)):
-        for j in range(len(Y_tick)):
-            zpos = np.min(interp.get_Zlist_pos(X_tick[i], Y_tick[j], np.concatenate((data[:,0:2],np.reshape(Zsurf,(len(Zsurf),1))),axis=1))[1])
-            Surf[j,i] = zpos
+    for i in range(len(X_range)):
+        for j in range(len(Y_range)):
+            zpos = np.min(interp.get_Zlist_pos(X_range[i], Y_range[j], np.concatenate((data[:,0:2],np.reshape(Z_surf,(len(Z_surf),1))),axis=1))[1])
+            Surf[j,i] = zpos;
     return X_surf, Y_surf, Surf
 
 def get_tick_argminmax(cond_min,cond_max):
@@ -340,12 +347,15 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, nb_points, plot):
     # Plotting the wind-cube if required
     if plot == True:
 
-        X_surf, Y_surf, Surf = get_surf()
-
-        fig = plt.figure(figsize=(16,12)) 
-        ax = fig.gca(projection='3d') 
-        ax.quiver(X_mesh, Y_mesh, Z_mesh+Sinterp, Uinterp, Vinterp, Winterp, length=max(X_mesh[0,:,0])/400) 
-        ax.plot_surface(X_surf,Y_surf, Surf,color="#FBEEE6")
+        X_range, Y_range, Z_range = get_interv(xlim, ylim, zlim)
+        
+        X_surf, Y_surf, Surf = get_surf(X_range, Y_range)
+        
+        fig = plt.figure(figsize=(16,10)) 
+        ax = fig.gca(projection='3d')
+        ax.plot_surface(X_surf,Y_surf, Surf, cmap=cm.terrain)
+        ax.quiver(X_mesh, Y_mesh, Z_mesh+Sinterp, Uinterp, Vinterp, Winterp, colors='#7F8C8D', length=max(X_mesh[0,:,0])/400)
+        ax.set_zlim([max(0,min(Sinterp[0,0,:])),max(2000+min((Z_mesh+Sinterp)[0,0,:]),max((Z_mesh+Sinterp)[0,0,:]))])
         plt.ion()
         plt.xlabel('x (m)')
         plt.ylabel('y (m)')
@@ -523,7 +533,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
             # Plot if required
             if plot == True:
                 
-                X_surf, Y_surf, Surf = get_surf()
+                X_surf, Y_surf, Surf = get_surf(X_tick, Y_tick)
 
                 plt.figure(figsize=(14,12))
                 # wind surface

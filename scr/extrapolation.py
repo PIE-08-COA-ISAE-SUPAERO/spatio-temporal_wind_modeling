@@ -171,8 +171,8 @@ def get_extrap_law(Z,wind,law):
 
     """
     # Initialization
-    Vextrap_points = wind
-    Zextrap_points = Z
+    Vextrap_points = wind[10:-1]
+    Zextrap_points = Z[10:-1]
     success = False
     
     # Error indicators.
@@ -198,6 +198,7 @@ def get_extrap_law(Z,wind,law):
                 # Selection of the highest points.
                 Vextrap_points = Vextrap_points[1:]
                 Zextrap_points = Zextrap_points[1:]
+    
     return Zextrap_points,Vextrap_points, best_val
 
 def main(points,wind,points_surf,elev_max, step):

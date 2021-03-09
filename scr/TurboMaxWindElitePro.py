@@ -619,7 +619,7 @@ class wind:
           axis : string
                Type of interpoltion to do. "z" for a wind surface, "x" or "y" for a
                wind profile.
-          coord : Narry of float
+          coord : Narray of float
                Coordinates of the point for the wind profile.
           alt : float
                Altitude for the wind surface.
@@ -634,7 +634,8 @@ class wind:
           Y_mesh : Narray of floats
                3D-mesh for the interpolated x coordinates.
           Z_mesh : Narray of floats
-               3D-mesh for the interpolated x coordinates.
+               3D-mesh for the interpolated x coordinates. In elevation convention for a wind_profile, 
+               in altitude convention for a wind_surface.
           Uinterp : Narray of floats
                3D-mesh for the interpolated wind speed component along x-axis.
           Vinterp : Narray of floats

@@ -289,7 +289,7 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, nb_points, plot):
     ylim : Narray of floats
         Numpy array of size 2 containing the limits of the y-axis range.
     zlim : Narray of floats
-        Numpy array of size 2 containing the limits of the z-axis range.
+        Numpy array of size 2 containing the limits of the z-axis range. In elevation convention.
     nb_points : int
         Number of output points along x and y axes. Default = 10.
     plot : Bool
@@ -302,7 +302,7 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, nb_points, plot):
     Y_mesh : Narray of floats
         3D-mesh for the interpolated x coordinates.
     Z_mesh : Narray of floats
-        3D-mesh for the interpolated x coordinates.
+        3D-mesh for the interpolated x coordinates. In elevation convention.
     Uinterp : Narray of floats
         3D-mesh for the interpolated wind speed component along x-axis.
     Vinterp : Narray of floats
@@ -365,7 +365,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
     axis : string
         Type of interpoltion to do. "z" for a wind surface, "x" or "y" for a
         wind profile.
-    coord : Narry of float
+    coord : Narray of float
         Coordinates of the point for the wind profile.
     alt : float
         Altitude for the wind surface. Must be the altitude above sea level.
@@ -381,7 +381,8 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
     Y_mesh : Narray of floats
         3D-mesh for the interpolated x coordinates.
     Z_mesh : Narray of floats
-        3D-mesh for the interpolated x coordinates.
+        3D-mesh for the interpolated x coordinates. In elevation convention for the 
+        wind_profile and altitude convention for the xind_surface.
     Uinterp : Narray of floats
         3D-mesh for the interpolated wind speed component along x-axis.
     Vinterp : Narray of floats
@@ -413,7 +414,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
     global Z_tick
     Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
     
-    # Wind profile
+    # Wind profile --> interpolation in elevation convention
     if axis == "x" or axis == "y":
         #Decomposing the coordinates
         x = coord[0]

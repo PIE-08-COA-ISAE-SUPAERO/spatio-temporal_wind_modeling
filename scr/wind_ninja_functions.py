@@ -60,8 +60,9 @@ def main(input_path: str, simu_name: str):
     json_path: str = simu_path + '/' + simu_name + '.json'
     with open(json_path) as f:
         config_text = json.load(f)
-        mnt_file: bool = config_text['location']['mntFile']
-        grib_file: bool = config_text['location']['gribFile']
+        version = config_text['def']['version']
+        mnt_file: bool = config_text['def']['mntFile']
+        grib_file: bool = config_text['def']['gribFile']
         for simu_id in range(len(config_text['windNinjaSimulations'])):
             chosen_simu = config_text['windNinjaSimulations'][simu_id]['name']
             if chosen_simu == simu_name:
@@ -94,8 +95,9 @@ def main(input_path: str, simu_name: str):
     cfg_path = simu_path + '/' + simu_name + '.cfg'
     cfg_file = open(file=cfg_path, mode='w+')
     for param_key, param_values in wind_ninja_simulation.items():
-        if param_key != 'name':
+        if param_key != 'version' or param_key != 'name':
             cfg_file.write(param_key + '=' + str(param_values) + '\n')
+
 
 
 
@@ -106,7 +108,7 @@ def main(input_path: str, simu_name: str):
 
     # Call the WindNinja_cli and call him in prompt command ligne
     # The outputs will be on the output_path
-    windNinja_path = "C:\\WindNinja\\WindNinja-3.7.1\\bin\\WindNinja_cli"
+    windNinja_path = "C:\\WindNinja\\WindNinja-"+ version +"\\bin\\WindNinja_cli"
     windNinja_command: str = windNinja_path + " " + cfg_path + " --output_path " + output_path
     os.popen(windNinja_command)
 

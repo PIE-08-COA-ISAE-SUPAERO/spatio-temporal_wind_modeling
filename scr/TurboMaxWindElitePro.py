@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import numpy.random as rd
 import json
-# import os 
+import os 
 
 import wind_ninja_functions as wn_function
 import vtk_functions as vtk
@@ -165,10 +165,10 @@ class wind:
           self._nb_layer_extrapolation = data["extrapolation"]["nb_layer_extrapolation"]
           self._elevation_max = data["extrapolation"]["elevation_max"]
           self._folder_name = simulation_folder_name
-          self._date = data["windNinjaSimulations"]["year"] + '_' + data["windNinjaSimulations"]["month"] + '_' + data["windNinjaSimulations"]["day"] 
+          self._date = data["def"]["date"] 
 
           #We launch the Wind Ninja simulation
-          #assert wn_function.main(input_folder_path, simulation_folder_name)
+          # assert wn_function.main(input_folder_path, simulation_folder_name)
 
           #We get the .vtk file
           #Check if there is only 1 file
@@ -189,9 +189,13 @@ class wind:
           points, wind, surface = vtk.main(wind_file, surf_file)
 
           #We find the location
+          self._location = [data["windNinjaSimulations"][0]["x_center"], data["windNinjaSimulations"][0]["y_center"]]
+          
+          dx = - data["windNinjaSimulations"][0]["x_buffer"] * 1000 + points[0,0]
+          dy = - data["windNinjaSimulations"][0]["y_buffer"] * 1000 + points[0,1]
 
+          self._location = coordinates_comput(self._location, dx/1000, dy/1000)
 
-          # self._location = 
           extrap_field = extrapolation.main(points, wind, surface, self._elevation_max, self._nb_layer_extrapolation)
 
           #We construct the dictionnary cube
@@ -263,18 +267,22 @@ class wind:
           return self._convert2dico()
      
      def get_point(self, latitude, longitude, elevation = 0, altitude = 0, plot = True):
-          """
-          Return the wind parameters at the specific position requested, with interpolation if needed and plot a wind rose if wished
+          """Return the wind parameters at the specific position requested, with interpolation if needed and plot a wind rose if wished
+          Parameters
+
           Parameters
           ----------
           latitude : double
                The latitude of the point wanted.
           longitude : double
                The longitude of the point wanted.
-          altitude : double
-               The altitude of the point wanted.
-          plot : boolean
-               Activates the plot option.
+          elevation : int, optional
+              The elevation (distance to the ground) of the point wanted, by default 0
+          altitude : int, optional
+              The altitude of the point wanted, by default 0
+          plot : bool, optional
+              Activates the plot option, by default True
+
           Returns
           -------
           Tuple:
@@ -293,36 +301,30 @@ class wind:
           """
           #Get the distance the cube uses
           x_wanted, y_wanted = flat_distance_point((latitude, longitude), self._location)
-          z_wanted = altitude
           
+          if elevation == 0 and altitude == 0 :
+               print('Please select and elevation or an altitude')
+               return 0
+          elif altitude == 0 and elevation != 0 :
+               z_wanted = elevation
+          elif altitude != 0 and elevation == 0 :
+               z_wanted = altitude - self.get_surface_altitude(latitude, longitude)
+          else :
+               z_wanted = elevation
+
           #Check if the point is in the x and y boundaries
           if self._list_point["x"][-1] < x_wanted or self._list_point["y"][-1] < y_wanted :
                print("This point does not belong in the cube")
                return 0
 
-          #Get the surface altitude as a function of x and y
-          map_surface = [ [ self._wind_cube["Position"][i, 0], self._wind_cube["Position"][i, 1], self._wind_cube["Surface_altitude"][i] ] for i in range(self._nb_points)]
-          map_surface = np.array(map_surface)
+          #Check if the point is in the z boundaries
+          if self._elevation_max < z_wanted or z_wanted < 0 : 
+               print("This point does not belong in the cube")
+               return 0
           
           #Get the smallest cube (x,y) possible 
           x_min, x_max = smallest_interval(x_wanted, self._list_point["x"])
-          y_min, y_max = smallest_interval(y_wanted, self._list_point["y"])
-          
-          #Find the surface in this small cube
-          surface_alt = extrapolation.get_Zlist_pos(x_max, y_max, map_surface)[1]
-          surface_alt = np.unique(surface_alt)[0]
-
-          #Check the z boundary
-          min_z = surface_alt
-          max_z = min_z + self._elevation_max          
-          if z_wanted < min_z:
-               print("This point is below ground : " + str(z_wanted) + "m VS " + str(min_z) + "m")
-               return 0
-
-          if max_z < z_wanted :
-               print("This point is to high above the ground : " + str(z_wanted) + "m VS " + str(max_z) + "m")
-               return 0
-          
+          y_min, y_max = smallest_interval(y_wanted, self._list_point["y"])          
           z_min, z_max = smallest_interval(z_wanted, self._list_point["z"])
 
           #Get the distance for the interpolation
@@ -775,21 +777,19 @@ def coordinates_comput(point, dx = 0, dy = 0):
      point : Tuple
          The coordinates of the point of origin
      dx : double, optional
-         The algebraic distance (positive towards East), by default 0
+         The algebraic distance in km (positive towards East), by default 0
      dy : double, optional
-         The algebraic distance (positive towards North), by default 0
+         The algebraic distance in km (positive towards North), by default 0
 
      Returns
      -------
      Tuple
          The corrdinates of the final point.
      """     
-     lat1, long1 = point
+     lat = point[0] + 2 * np.rad2deg(np.arcsin(dy/2/R_terre))
+     lon = point[1] + 2 * np.rad2deg(np.arcsin(dx/2/R_terre))
 
-     lat2 = lat1 + np.arcsin(dy/2/R_terre)
-     long2 = long1 + np.arcsin(dx/2/R_terre)
-
-     return lat2, long2
+     return lat, lon
 
 def spectre_prin(frequency, speed, altitude):
     

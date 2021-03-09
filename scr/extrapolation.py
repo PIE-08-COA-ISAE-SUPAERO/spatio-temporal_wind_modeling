@@ -268,6 +268,9 @@ def main(points,wind,points_surf,elev_max, step):
     W_extrap = []
     Z_surf = []
     
+    # Coordinates of the ref point
+    x0 = X_tick[0]
+    y0 = Y_tick[0]
     # For each point of the mesh
     for i in range(len(X_tick)):
         for j in range(len(Y_tick)):
@@ -296,8 +299,8 @@ def main(points,wind,points_surf,elev_max, step):
             W_pos = Wcalc(Z_tick)
             
             # Adding the coordinates of the current point
-            X_extrap = np.append(X_extrap,np.ones(len(Z_tick))*x_pos)
-            Y_extrap = np.append(Y_extrap,np.ones(len(Z_tick))*y_pos)
+            X_extrap = np.append(X_extrap,np.ones(len(Z_tick))*(x_pos - x0))
+            Y_extrap = np.append(Y_extrap,np.ones(len(Z_tick))*(y_pos - y0))
             Z_extrap = np.append(Z_extrap,Z_tick)  # In altitude conv
             
             Z_surf = np.append(Z_surf,np.ones(len(Z_tick))*z_surf)
@@ -320,8 +323,8 @@ def main(points,wind,points_surf,elev_max, step):
             W_pos_extrap = power_law(Z_pos_extrap,param_pow[0], param_pow[1])
             
             # Adding the coordinates of the extrapolated points
-            X_extrap = np.append(X_extrap,np.ones(len(Z_pos_extrap))*x_pos)
-            Y_extrap = np.append(Y_extrap,np.ones(len(Z_pos_extrap))*y_pos)
+            X_extrap = np.append(X_extrap,np.ones(len(Z_pos_extrap))*(x_pos - x0))
+            Y_extrap = np.append(Y_extrap,np.ones(len(Z_pos_extrap))*(y_pos - y0))
             Z_extrap = np.append(Z_extrap, Z_pos_extrap)
             
             Z_surf = np.append(Z_surf,np.ones(len(Z_pos_extrap))*z_surf)

@@ -480,8 +480,12 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
         # Wind surface
         if axis == "z":
             # Checking altitude inside bounds
-            if alt < min(Zsurf) or alt > max(Zsurf):
-                raise ValueError("Altitude out of bounds")
+            if alt < min(Z_surf):
+                raise ValueError("Altitude below ground surface")
+            if alt > (max(Z_surf) + max(Z_tick)):
+                raise ValueError("Altitude exceed the maximum altitude of the domain")
+            if alt > (min(Z_surf) + max(Z_tick)):
+                raise Warning("Altitude exceed the maximum calculated elevation over the lowest point of the domain. Some points might not be interpolated")
             # Creating the limit arrays
             xlim = np.array([X_tick[0], X_tick[-1]])
             ylim = np.array([Y_tick[0], Y_tick[-1]])

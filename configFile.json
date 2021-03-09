@@ -2,10 +2,7 @@
 	"def":{
 		"version": "3.7.1",
 		"name":"LesNoisetiers",
-		"latitude":48.1498753,
-		"longitude":0.3560498,
-		"z_from":30,
-		"z_to":60,
+		"date": "2021-03-19",
 		"mntFile":false,
 		"gribFile":false
 	},
@@ -23,23 +20,13 @@
 			"y_center": 0.3560498,
 			"x_buffer":10,
 			"y_buffer":10,
-			"buffer_units":"km",
+			"buffer_units":"kilometers",
 			"elevation_source":"world_srtm",
-
 			"mesh_choice":"coarse",
-			"mesh_resolution":500,
-			"units_mesh_resolution":"m",
+
 
 			"time_zone":"Europe/Paris",
-			"year": 2021,
-			"month": 3,
-			"day": 5,
-			"hour": 7,
-			"minute": 0,
 
-			"diurnal_winds":false,
-
-			"non_neutral_stability":false,
 
 			"initialization_method":"wxModelInitialization",
 			"wx_model_type":"NOMADS-GFS-GLOBAL-0.25-DEG",
@@ -47,8 +34,11 @@
 
 			"vegetation":"grass",
 
-			"momentum_solver":true,
-			"number_of_iterations":300,
+			"diurnal_winds":false,
+
+			"non_neutral_stability":false,
+
+
 
 			"output_speed_units":"kts",
 			"output_wind_height":30.0,

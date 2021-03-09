@@ -1,5 +1,6 @@
 {
-	"location":{
+	"def":{
+		"version": "3.7.1",
 		"name":"LesNoisetiers",
 		"latitude":48.1498753,
 		"longitude":0.3560498,

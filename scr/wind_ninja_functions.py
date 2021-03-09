@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Wind Ninja simulation.
 This module contains all the functions required to launch the wind ninja simulation.
-@author: A. Cavalcanti Liberal (2020)
+@author: A. Liberal Cavalcanti (2020)
 """
 from typing import List
 
@@ -60,7 +60,8 @@ def main(input_path: str, simu_name: str):
     json_path: str = simu_path + '/' + simu_name + '.json'
     with open(json_path) as f:
         config_text = json.load(f)
-        version = config_text['def']['version']
+        version: str = config_text['def']['version']
+        date: str = config_text['def']['date']
         mnt_file: bool = config_text['def']['mntFile']
         grib_file: bool = config_text['def']['gribFile']
         for simu_id in range(len(config_text['windNinjaSimulations'])):
@@ -102,7 +103,7 @@ def main(input_path: str, simu_name: str):
 
 
     # Create the output folder
-    output_path = simu_path + '/output'
+    output_path = simu_path + '/output_' + date
     if not os.path.exists(output_path):
         os.mkdir(output_path)
 

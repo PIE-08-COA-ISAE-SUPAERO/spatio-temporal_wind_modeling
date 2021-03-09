@@ -9,19 +9,19 @@ This module contains the wind class and every function linked to it
      Quentin Abeille
 """
 
+#%% Some imports
 import numpy as np
 import matplotlib.pyplot as plt
 import numpy.random as rd
-
 import json
-import os 
+# import os 
 
-#import wind_ninja_functions as wn_function
+import wind_ninja_functions as wn_function
 import vtk_functions as vtk
 import extrapolation 
 import plots
 
-#%% Global variable
+#%% Global variables
 R_terre = 6371 #Earth radius (km)
 
 #Some variable for turbulence
@@ -153,6 +153,9 @@ class wind:
           if len(files) > 1 :
                print("There is more than 1 .json file, please only keep one")
                return flag
+          elif len(files) == 0 :
+               print("There is no .json file, please add one")
+               return flag
 
           config_file = files[0]
           with open(input_folder_path + "/" + config_file, "r") as read_file:
@@ -161,12 +164,11 @@ class wind:
           #We store the information we have
           self._nb_layer_extrapolation = data["extrapolation"]["nb_layer_extrapolation"]
           self._elevation_max = data["extrapolation"]["elevation_max"]
-          self._location = (data["location"]["latitude"],data["location"]["longitude"])
           self._folder_name = simulation_folder_name
-          self._date = data["period"]["start"]
+          self._date = data["windNinjaSimulations"]["year"] + '_' + data["windNinjaSimulations"]["month"] + '_' + data["windNinjaSimulations"]["day"] 
 
           #We launch the Wind Ninja simulation
-          assert wn_function.main(input_folder_path, simulation_folder_name)
+          #assert wn_function.main(input_folder_path, simulation_folder_name)
 
           #We get the .vtk file
           #Check if there is only 1 file
@@ -185,6 +187,11 @@ class wind:
                surf_file += files[1]
 
           points, wind, surface = vtk.main(wind_file, surf_file)
+
+          #We find the location
+
+
+          # self._location = 
           extrap_field = extrapolation.main(points, wind, surface, self._elevation_max, self._nb_layer_extrapolation)
 
           #We construct the dictionnary cube
@@ -318,7 +325,6 @@ class wind:
           
           z_min, z_max = smallest_interval(z_wanted, self._list_point["z"])
 
-
           #Get the distance for the interpolation
           dx = x_max - x_min
           dy = y_max - y_min
@@ -364,6 +370,44 @@ class wind:
           
           return u, v, w, wind_speed, wind_speed_flat, direction
 
+     def get_surface_altitude(self, latitude, longitude):
+          """Get the altitude of the ground of the given coordinates
+
+          Parameters
+          ----------
+          latitude : double
+              The latitude of the coordinates
+          longitude : double
+              The longitude of the coordinates
+
+          Returns
+          -------
+          double
+              The altitude of the surface
+          """          
+          map_surface = [ [ self._wind_cube["Position"][i, 0], self._wind_cube["Position"][i, 1], self._wind_cube["Surface_altitude"][i] ] for i in range(self._nb_points)]
+          map_surface = np.array(map_surface)
+          x, y = flat_distance_point((latitude, longitude), self._location)
+
+          #Get the smallest cube (x,y) possible 
+          x_min, x_max = smallest_interval(x, self._list_point["x"])
+          y_min, y_max = smallest_interval(y, self._list_point["y"])
+          
+          if abs(x_min - x) < abs(x_max - x) :
+               x = x_min
+          else :
+               x = x_max
+
+          if abs(y_min - y) < abs(y_max - y) :
+               y = y_min
+          else : 
+               y = y_max
+
+          surface_alt = extrapolation.get_Zlist_pos(x, y, map_surface)[1]
+          surface_alt = np.unique(surface_alt)[0]
+
+          return surface_alt
+
      def turbulence(self, latitude, longitude, altitude, time, plot = True):
           """
           Return the wind parameters at the specific position requested with a random turbulence component  and plot a wind rose if wished
@@ -399,16 +443,7 @@ class wind:
           u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
           
           #We get the altitude of the selected geographical point
-          map_surface = [ [ self._wind_cube["Position"][i, 0], self._wind_cube["Position"][i, 1], self._wind_cube["Surface_altitude"][i] ] for i in range(self._nb_points)]
-          map_surface = np.array(map_surface)
-          x, y = flat_distance_point((latitude, longitude), self._location)
-
-          #Get the smallest cube (x,y) possible 
-          _, x_max = smallest_interval(x, self._list_point["x"])
-          _, y_max = smallest_interval(y, self._list_point["y"])
-
-          surface_alt = extrapolation.get_Zlist_pos(x_max, y_max, map_surface)[1]
-          surface_alt = np.unique(surface_alt)[0]
+          surface_alt = self.get_surface_altitude(latitude, longitude)
 
           _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, surface_alt + 10)
 
@@ -506,16 +541,7 @@ class wind:
           u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
           
           #We get the altitude of the selected geographical point
-          map_surface = [ [ self._wind_cube["Position"][i, 0], self._wind_cube["Position"][i, 1], self._wind_cube["Surface_altitude"][i] ] for i in range(self._nb_points)]
-          map_surface = np.array(map_surface)
-          x, y = flat_distance_point((latitude, longitude), self._location)
-
-          #Get the smallest cube (x,y) possible 
-          _, x_max = smallest_interval(x, self._list_point["x"])
-          _, y_max = smallest_interval(y, self._list_point["y"])
-
-          surface_alt = extrapolation.get_Zlist_pos(x_max, y_max, map_surface)[1]
-          surface_alt = np.unique(surface_alt)[0]
+          surface_alt = self.get_surface_altitude(latitude, longitude)
 
           _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, surface_alt + 10)
           
@@ -740,6 +766,30 @@ def flat_distance_point(point1, point2):
      dy = 2 * R_terre * np.sin(dlat)
      
      return dx, dy
+
+def coordinates_comput(point, dx = 0, dy = 0):
+     """Compute the coordinates from a point and algebraic distance in km
+
+     Parameters
+     ----------
+     point : Tuple
+         The coordinates of the point of origin
+     dx : double, optional
+         The algebraic distance (positive towards East), by default 0
+     dy : double, optional
+         The algebraic distance (positive towards North), by default 0
+
+     Returns
+     -------
+     Tuple
+         The corrdinates of the final point.
+     """     
+     lat1, long1 = point
+
+     lat2 = lat1 + np.arcsin(dy/2/R_terre)
+     long2 = long1 + np.arcsin(dx/2/R_terre)
+
+     return lat2, long2
 
 def spectre_prin(frequency, speed, altitude):
     

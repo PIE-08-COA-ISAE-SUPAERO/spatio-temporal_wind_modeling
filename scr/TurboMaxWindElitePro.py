@@ -168,7 +168,7 @@ class wind:
           self._date = data["def"]["date"] 
 
           #We launch the Wind Ninja simulation
-          # assert wn_function.main(input_folder_path, simulation_folder_name)
+          assert wn_function.main(input_folder_path, simulation_folder_name)
 
           #We get the .vtk file
           #Check if there is only 1 file

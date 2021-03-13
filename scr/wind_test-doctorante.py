@@ -73,7 +73,40 @@ while i_heure < N :
     i_alt =0
     i_heure += 1
 
-#%% Test
+U_err = U_Fin[:,1] - U_Fin[:,0]
+V_err = V_Fin[:,1] - V_Fin[:,0]
+W_err = W_Fin[:,1] - W_Fin[:,0]
+Norme_err = Norme_Fin[:,1] - Norme_Fin[:,0]
+Norme_Plan_Err = Norme_Plan_Fin[:,1] - Norme_Plan_Fin[:,0]
+
+#%% Test 
+
+def hist_err(data, name = ''):
+    data = np.ravel(data)
+    N = int(len(data))
+    
+    min_x = np.min(data)
+    max_x = np.max(data)
+
+    x = np.linspace(min_x, max_x, N)
+    y = np.zeros(N)
+
+    for i in range(N):
+        for j in range(N-1):
+            if x[j] <= data[i] and data[i] <= x[j+1]:
+                y[j] += 1
+    y /= len(data)
+
+    plt.figure(name)
+    plt.plot(x,y)
+
+    plt.xlabel('Erreur résiduelle (m/s)')
+    plt.ylabel('Probabilité')
+
+    plt.show()
+
+hist_err([U_err, V_err, W_err, Norme_err, Norme_Plan_Err])
+
 
 def print_err_simu(data, name, plot = True):
         
@@ -107,9 +140,9 @@ def print_err_simu(data, name, plot = True):
         plt.legend()
         plt.show()
 
-print_err_simu(U_Fin, 'u', True)
-print_err_simu(V_Fin, 'v', True)
-print_err_simu(W_Fin, 'w', True)
-print_err_simu(Norme_Fin, 'norme', True)
-print_err_simu(Norme_Plan_Fin, 'norme plane', True)
+# print_err_simu(U_Fin, 'u', True)
+# print_err_simu(V_Fin, 'v', True)
+# print_err_simu(W_Fin, 'w', True)
+# print_err_simu(Norme_Fin, 'norme', True)
+# print_err_simu(Norme_Plan_Fin, 'norme plane', True)
 

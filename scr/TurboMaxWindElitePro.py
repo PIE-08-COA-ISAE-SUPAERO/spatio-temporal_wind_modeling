@@ -191,18 +191,13 @@ class wind:
                wind_file += files[0]
                surf_file += files[1]
 
-          points, wind, surface = vtk.main(wind_file, surf_file)
-
-          #We find which simulation it is
-          for simu_id in range(len(data['windNinjaSimulations'])):
-            chosen_simu = data['windNinjaSimulations'][simu_id]['name']
-            if chosen_simu == simu_name: id_simu = simu_id
+          points, wind, surface = vtk.main(wind_file, surf_file)  
 
           #We find the location
-          self._location = [data["windNinjaSimulations"][id_simu]["x_center"], data["windNinjaSimulations"][id_simu]["y_center"]]
+          self._location = [data["windNinjaSimulations"]["x_center"], data["windNinjaSimulations"]["y_center"]]
           
-          dx = - data["windNinjaSimulations"][id_simu]["x_buffer"] * 1000 + points[0,0]
-          dy = - data["windNinjaSimulations"][id_simu]["y_buffer"] * 1000 + points[0,1]
+          dx = - data["windNinjaSimulations"]["x_buffer"] * 1000 + points[0,0]
+          dy = - data["windNinjaSimulations"]["y_buffer"] * 1000 + points[0,1]
 
           self._location = coordinates_comput(self._location, dx/1000, dy/1000)
 

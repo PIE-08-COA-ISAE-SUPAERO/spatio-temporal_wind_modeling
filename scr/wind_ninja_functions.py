@@ -12,8 +12,10 @@ def main(input_path: str, output_path: str, simu_name: str):
         ----------
         input_path : String
             Name of the input path, where you must put the .tif and  #Hour of collection of the data. Pleaqe type '00' for midnight, '06' for 6 AM and '22' for 10 PM.
-        simu_name : String
+        output_path : String
             The path of the folder where every files is going to be stored
+        simu_name : String
+            The name of the simulation
         Returns
         -------
             bool

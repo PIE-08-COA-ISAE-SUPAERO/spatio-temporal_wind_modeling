@@ -85,7 +85,7 @@ Norme_Plan_Err = Norme_Plan_Fin[:,1] - Norme_Plan_Fin[:,0]
 
 def hist_err(data, name = ''):
     data = np.ravel(data)
-    # N = int(len(data)*1)
+    N = int(len(data)*0.6)
     
     # print(N, len(data))
 
@@ -119,7 +119,9 @@ def hist_err(data, name = ''):
     # plt.ylim([0, np.max(y_filtre)*1.1])
 
     # plt.show()
-    sns.distplot(data)
+    sns.distplot(data, bins = N)
+    plt.ylabel('Probalbilité %')
+    plt.xlabel('Erreur commise (m/s)') 
     
 hist_err([U_err, V_err, W_err, Norme_err, Norme_Plan_Err])
 

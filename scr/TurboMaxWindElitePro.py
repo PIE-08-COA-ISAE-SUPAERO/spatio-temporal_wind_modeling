@@ -131,13 +131,13 @@ class wind:
 
           return wind_cube
      
-     def create_wind_cube(self, input_folder_path, simulation_folder_name):
+     def create_wind_cube(self, input_path, simu_name, output_path=""):
           """Create the wind cube by launching the simulation
           Parameters
           ----------
-          input_folder_path : String
+          input_path : String
               The folder where the input file (config_file : .json, .tif, and the wind file are stored)
-          simulation_folder_name : String
+          output_path : String
               The name of the folder where the data is going to be stored in the DATA folder
           Returns
           -------
@@ -147,9 +147,14 @@ class wind:
 
           flag = False
 
+          if output_path == "" : output_path = input_path
+                  
+          if input_path[-1] != "/" : input_path += '/'
+          if output_path[-1] != "/" : output_path += '/'
+
           #We get the config file to extract some information         
           #Check if there is only 1 file
-          files = file_list_by_extension(input_folder_path, ".json")          
+          files = file_list_by_extension(input_path, ".json")          
           if len(files) > 1 :
                print("There is more than 1 .json file, please only keep one")
                return flag
@@ -158,26 +163,26 @@ class wind:
                return flag
 
           config_file = files[0]
-          with open(input_folder_path + "/" + config_file, "r") as read_file:
+          with open(input_path + config_file, "r") as read_file:
                data = json.load(read_file)
           
           #We store the information we have
           self._nb_layer_extrapolation = data["extrapolation"]["nb_layer_extrapolation"]
           self._elevation_max = data["extrapolation"]["elevation_max"]
-          self._folder_name = simulation_folder_name
+          self._folder_name = output_path
           self._date = data["def"]["date"] 
 
           #We launch the Wind Ninja simulation
-          assert wn_function.main(input_folder_path, simulation_folder_name)
+          assert wn_function.main(input_path, simu_name, output_path)
 
           #We get the .vtk file
           #Check if there is only 1 file
-          files = file_list_by_extension(simulation_folder_name, ".vtk")
+          files = file_list_by_extension(output_path, ".vtk")
           if len(files) != 2 :
                print("There is an error in the simulation")
                return flag
           
-          wind_file  = surf_file = simulation_folder_name + '/'
+          wind_file  = surf_file = output_path
 
           if "_surf" in files[0] :     
                wind_file += files[1]
@@ -188,11 +193,16 @@ class wind:
 
           points, wind, surface = vtk.main(wind_file, surf_file)
 
+          #We find which simulation it is
+          for simu_id in range(len(data['windNinjaSimulations'])):
+            chosen_simu = data['windNinjaSimulations'][simu_id]['name']
+            if chosen_simu == simu_name: id_simu = simu_id
+
           #We find the location
-          self._location = [data["windNinjaSimulations"][0]["x_center"], data["windNinjaSimulations"][0]["y_center"]]
+          self._location = [data["windNinjaSimulations"][id_simu]["x_center"], data["windNinjaSimulations"][id_simu]["y_center"]]
           
-          dx = - data["windNinjaSimulations"][0]["x_buffer"] * 1000 + points[0,0]
-          dy = - data["windNinjaSimulations"][0]["y_buffer"] * 1000 + points[0,1]
+          dx = - data["windNinjaSimulations"][id_simu]["x_buffer"] * 1000 + points[0,0]
+          dy = - data["windNinjaSimulations"][id_simu]["y_buffer"] * 1000 + points[0,1]
 
           self._location = coordinates_comput(self._location, dx/1000, dy/1000)
 

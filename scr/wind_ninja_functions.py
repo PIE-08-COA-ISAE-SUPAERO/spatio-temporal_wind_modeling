@@ -74,7 +74,7 @@ def main(input_path: str, simu_name: str, output_path: str):
         wind_ninja_simulation = config_text['windNinjaSimulations']
 
     #Once the .json file is read it will get the mnt file's name and copy it in the simulation folder
-    if mnt_file is "true":
+    if mnt_file and input_path != output_path:
         tif_files: List[str] = [pos_tif for pos_tif in os.listdir(input_path) if pos_tif.endswith('.tif')]
         if not tif_files:
             print("Input .tif file doesn't exist!")
@@ -84,7 +84,7 @@ def main(input_path: str, simu_name: str, output_path: str):
             shutil.copyfile(input_path + tif_file, output_path + tif_file)
 
     #Once the .json file is read it will get the grib file's and copy it in the simulation folder
-    if grib_file is "true":
+    if grib_file and input_path != output_path:
         # Verify if the wind file .??? exist
         wind_files: List[str] = [pos_wind for pos_wind in os.listdir(input_path) if pos_wind.endswith('.wind')]
         if not wind_files:
@@ -103,11 +103,12 @@ def main(input_path: str, simu_name: str, output_path: str):
 
     # Call the WindNinja_cli and call him in prompt command ligne
     # The outputs will be on the output_path
-    windNinja_path = "C:\\WindNinja\\WindNinja-"+ version +"\\bin\\WindNinja_cli"
+    windNinja_path = "C:/WindNinja/WindNinja-"+ version +"/bin/WindNinja_cli"
 
     try :
         windNinja_command: str = windNinja_path + " " + cfg_path + " --output_path " + output_path
-        os.popen(windNinja_command)
+        print(windNinja_command)
+        os.system(windNinja_command)
     except:
         return False
     else :

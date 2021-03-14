@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 # from scipy.stats import linregress
 
 import xlrd 
+import seaborn as sns
 
+#%%
 folder = 'G:/Mon Drive/PIE COA 08/Codes/TESTS/FICHIERS TESTS/Données doctorante/OUPUT DATA/H'
 coord_station = (43.1498753, 0.3560498)
 
@@ -83,28 +85,42 @@ Norme_Plan_Err = Norme_Plan_Fin[:,1] - Norme_Plan_Fin[:,0]
 
 def hist_err(data, name = ''):
     data = np.ravel(data)
-    N = int(len(data))
+    # N = int(len(data)*1)
     
-    min_x = np.min(data)
-    max_x = np.max(data)
+    # print(N, len(data))
 
-    x = np.linspace(min_x, max_x, N)
-    y = np.zeros(N)
+    # min_x = np.min(data)
+    # max_x = np.max(data)
 
-    for i in range(N):
-        for j in range(N-1):
-            if x[j] <= data[i] and data[i] <= x[j+1]:
-                y[j] += 1
-    y /= len(data)
+    # x = np.linspace(min_x, max_x, N)
+    # y = np.zeros(N)
 
-    plt.figure(name)
-    plt.plot(x,y)
+    # for i in range(N):
+    #     for j in range(N-1):
+    #         if x[j] <= data[i] and data[i] <= x[j+1]:
+    #             y[j] += 1
+    # y = y / len(data) *100
 
-    plt.xlabel('Erreur résiduelle (m/s)')
-    plt.ylabel('Probabilité')
+    # x_filtre = []
+    # y_filtre = []
 
-    plt.show()
+    # for i in range(N):
+    #     if y[i] != 0:
+    #         x_filtre.append(x[i])
+    #         y_filtre.append(y[i])
 
+    # plt.figure(name)
+    # plt.plot(x_filtre, y_filtre, '-')
+
+    # plt.xlabel('Erreur résiduelle (m/s)')
+    # plt.ylabel("Probabilité d'erreur (%)")
+
+    # plt.xlim([np.min(x_filtre), np.max(x_filtre)])
+    # plt.ylim([0, np.max(y_filtre)*1.1])
+
+    # plt.show()
+    sns.distplot(data)
+    
 hist_err([U_err, V_err, W_err, Norme_err, Norme_Plan_Err])
 
 

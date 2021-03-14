@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """Wind Ninja simulation.
 This module contains all the functions required to launch the wind ninja simulation.
-@author: A. Liberal Cavalcanti (2020)
+@author: A. Liberal Cavalcanti (20201
 """
 from typing import List
 
-
-def main(input_path: str, simu_name: str):
+def main(input_path: str, output_path: str, simu_name: str):
     """Launch the wind ninja simulation and create the simulation files
 
         Parameters
@@ -99,11 +98,8 @@ def main(input_path: str, simu_name: str):
         if param_key != 'version' or param_key != 'name':
             cfg_file.write(param_key + '=' + str(param_values) + '\n')
 
-
-
-
     # Create the output folder
-    output_path = simu_path + '/output_' + date
+    output_path = output_path
     if not os.path.exists(output_path):
         os.mkdir(output_path)
 

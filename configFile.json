@@ -10,10 +10,7 @@
 		"nb_layer_extrapolation": 5,
 		"elevation_max":5.0
 	},
-	"windNinjaSimulations":[
-		{
-			"name":"momentumSolver",
-
+	"windNinjaSimulations":{
 			"num_threads":1,
 
 			"x_center": 48.1498753,
@@ -46,5 +43,4 @@
 			"write_pdf_output":true,
 			"write_vtk_output":true
 		}
-	]
 }

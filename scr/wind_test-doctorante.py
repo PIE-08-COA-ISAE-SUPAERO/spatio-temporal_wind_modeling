@@ -75,60 +75,50 @@ while i_heure < N :
     i_alt =0
     i_heure += 1
 
-U_err = U_Fin[:,1] - U_Fin[:,0]
-V_err = V_Fin[:,1] - V_Fin[:,0]
-W_err = W_Fin[:,1] - W_Fin[:,0]
-Norme_err = Norme_Fin[:,1] - Norme_Fin[:,0]
-Norme_Plan_Err = Norme_Plan_Fin[:,1] - Norme_Plan_Fin[:,0]
+U_err = (U_Fin[:,1] - U_Fin[:,0]) 
+V_err = (V_Fin[:,1] - V_Fin[:,0]) 
+W_err = (W_Fin[:,1] - W_Fin[:,0])
+Norme_err = (Norme_Fin[:,1] - Norme_Fin[:,0]) 
+Norme_Plan_Err = (Norme_Plan_Fin[:,1] - Norme_Plan_Fin[:,0]) 
 
 #%% Test 
+
+def plot_vitesses(data):
+    # data = [u, v, w]
+    nom = ['u', 'v', 'w']
+    format = ['--', '-.', '-o']
+    couleur = ['r', 'g', 'b']
+    x = range(1,N+1)
+
+    plt.figure()
+    for var in range(3):
+        for alt in range(3):
+            plt.plot(x, data[var][:, alt, 0], format[alt]+couleur[var], label = '$' + nom[var] + '_{' + str(altitude_station[alt]) + '}$')
+
+    plt.xlabel("Heure d'observation (h)")
+    plt.ylabel("Vitesse simulée (m/s)")
+    plt.legend()
+    plt.show()
+
+plot_vitesses([u, v, w])
 
 def hist_err(data, name = ''):
     data = np.ravel(data)
     N = int(len(data)*0.6)
     
-    # print(N, len(data))
-
-    # min_x = np.min(data)
-    # max_x = np.max(data)
-
-    # x = np.linspace(min_x, max_x, N)
-    # y = np.zeros(N)
-
-    # for i in range(N):
-    #     for j in range(N-1):
-    #         if x[j] <= data[i] and data[i] <= x[j+1]:
-    #             y[j] += 1
-    # y = y / len(data) *100
-
-    # x_filtre = []
-    # y_filtre = []
-
-    # for i in range(N):
-    #     if y[i] != 0:
-    #         x_filtre.append(x[i])
-    #         y_filtre.append(y[i])
-
-    # plt.figure(name)
-    # plt.plot(x_filtre, y_filtre, '-')
-
-    # plt.xlabel('Erreur résiduelle (m/s)')
-    # plt.ylabel("Probabilité d'erreur (%)")
-
-    # plt.xlim([np.min(x_filtre), np.max(x_filtre)])
-    # plt.ylim([0, np.max(y_filtre)*1.1])
-
-    # plt.show()
     sns.distplot(data, bins = N)
     plt.ylabel('Probalbilité %')
-    plt.xlabel('Erreur commise (m/s)') 
+    plt.xlabel('Erreur commise (m/s)')
+    plt.show()
     
-hist_err([U_err, V_err, W_err, Norme_err, Norme_Plan_Err])
+# hist_err([U_err, V_err, W_err, Norme_err, Norme_Plan_Err])
 
 
 def print_err_simu(data, name, plot = True):
         
-    sim, reel = data[:,0],data[:,1]
+    sim =  np.ravel([i[:,0] for i in data])
+    reel = np.ravel([i[:,1] for i in data])
+    data = [[sim[i], reel[i]] for i in range(len(sim))]
 
     # if name == 'w' :
     #     sim = [i *1000 for i in sim]
@@ -141,6 +131,7 @@ def print_err_simu(data, name, plot = True):
     y = a * x
 
     r = np.corrcoef(np.transpose(data))
+    print(name,' : ', r[0,1])
 
     if plot : 
         plt.figure(name)
@@ -158,9 +149,10 @@ def print_err_simu(data, name, plot = True):
         plt.legend()
         plt.show()
 
-# print_err_simu(U_Fin, 'u', True)
-# print_err_simu(V_Fin, 'v', True)
-# print_err_simu(W_Fin, 'w', True)
-# print_err_simu(Norme_Fin, 'norme', True)
-# print_err_simu(Norme_Plan_Fin, 'norme plane', True)
+# print_err_simu([U_Fin], 'u', False)
+# print_err_simu([V_Fin], 'v', False)
+# print_err_simu([W_Fin], 'w', False)
+# print_err_simu([Norme_Fin], 'norme', False)
+# print_err_simu([Norme_Plan_Fin], 'norme plane', False)
+# print_err_simu([U_Fin, V_Fin, W_Fin, Norme_Fin, Norme_Plan_Fin], 'total', False)
 

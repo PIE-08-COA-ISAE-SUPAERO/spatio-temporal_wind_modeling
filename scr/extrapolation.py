@@ -231,7 +231,11 @@ def main(points,wind,points_surf,elev_max, step):
         Array containing the altitude of the ground surface for each of the 
         (x,y,z) point of extrap_field.
 
-    """    
+    """
+    # Printing start message
+    print('###########################')
+    print('# Beginning extrapolation #')
+    print('###########################')
     # Decomposition along the axes
     X = np.array(points[:,0])
     Y = np.array(points[:,1])
@@ -272,9 +276,23 @@ def main(points,wind,points_surf,elev_max, step):
     # Coordinates of the ref point
     x0 = X_tick[0]
     y0 = Y_tick[0]
+
+    # Counters
+    Nb_iters = len(X_tick) * len(Y_tick)
+    count = -1
+    last = -1
+
     # For each point of the mesh
     for i in range(len(X_tick)):
         for j in range(len(Y_tick)):
+            # Keeping user posted
+            count += 1
+            percent_finish = round(count * 100/Nb_iters)
+            rest = percent_finish%10
+            if rest==0 and last != percent_finish//10:
+                print('Run : ', round(percent_finish), '%')
+                last = percent_finish//10
+
             # Current position
             x_pos = X_tick[i]
             y_pos = Y_tick[j]
@@ -341,7 +359,12 @@ def main(points,wind,points_surf,elev_max, step):
     
     # Transposition into a vertical array
     extrap_field = np.transpose(extrap_field)
-    
+
+    # Printing end message
+    print('########################')
+    print('# End of extrapolation #')
+    print('########################')
+
     return extrap_field
 
 def power_law(z,U10,alpha):

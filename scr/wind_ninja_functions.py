@@ -73,6 +73,7 @@ def main(input_path: str, simu_name: str, output_path: str):
         grib_file: bool = config_text['def']['gribFile']
         wind_ninja_simulation = config_text['windNinjaSimulations']
 
+
     #Once the .json file is read it will get the mnt file's name and copy it in the simulation folder
     if mnt_file and input_path != output_path:
         tif_files: List[str] = [pos_tif for pos_tif in os.listdir(input_path) if pos_tif.endswith('.tif')]
@@ -98,7 +99,9 @@ def main(input_path: str, simu_name: str, output_path: str):
     cfg_path = output_path + simu_name + '.cfg'
     with open(cfg_path, "w") as cfg_file:
         for param_key, param_values in wind_ninja_simulation.items():
-            if param_key != 'version' :
+            if param_key == 'fetch_elevation':
+                cfg_file.write(param_key + '=' + str(output_path+param_values) + '\n')
+            elif param_key != 'version' :
                 cfg_file.write(param_key + '=' + str(param_values) + '\n')
 
     # Call the WindNinja_cli and call him in prompt command ligne

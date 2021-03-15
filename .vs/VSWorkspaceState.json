@@ -1,8 +1,10 @@
 {
   "ExpandedNodes": [
     "",
+    "\\data",
+    "\\data\\Tests",
     "\\scr"
   ],
-  "SelectedNode": "\\scr\\TurboMaxWindElitePro.py",
+  "SelectedNode": "\\data\\desktop.ini",
   "PreviewInSolutionExplorer": false
 }

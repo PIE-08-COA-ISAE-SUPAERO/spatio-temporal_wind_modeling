@@ -1,0 +1,59 @@
+{
+	"location":{
+		"name":"Lannemezan",
+		"latitude":43.144772,
+		"longitude":0.352216,
+		"z_from":30,
+		"z_to":60,
+		"mntFile":false,
+		"gribFile":false
+	},
+	"extrapolation":{
+		"nb_layer_extrapolation": 5,
+		"elevation_max":500
+	},
+	"windNinjaSimulations":[
+		{
+			"name":"momentumSolver",
+
+			"num_threads":1,
+
+			"x_center": 48.1498753,
+			"y_center": 0.3560498,
+			"x_buffer":10,
+			"y_buffer":10,
+			"buffer_units":"km",
+			"elevation_source":"world_srtm",
+
+			"mesh_choice":"coarse",
+			"mesh_resolution":500,
+			"units_mesh_resolution":"m",
+
+			"time_zone":"Europe/Paris",
+			"year": 2021,
+			"month": 3,
+			"day": 5,
+			"hour": 7,
+			"minute": 0,
+
+			"diurnal_winds":false,
+
+			"non_neutral_stability":false,
+
+			"initialization_method":"wxModelInitialization",
+			"wx_model_type":"NOMADS-GFS-GLOBAL-0.25-DEG",
+			"forecast_duration":3,
+
+			"vegetation":"grass",
+
+			"momentum_solver":true,
+			"number_of_iterations":300,
+
+			"output_speed_units":"kts",
+			"output_wind_height":30.0,
+			"units_output_wind_height":"m",
+			"write_pdf_output":true,
+			"write_vtk_output":true
+		}
+	]
+}

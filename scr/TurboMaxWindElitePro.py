@@ -176,6 +176,20 @@ class wind:
           assert wn_function.main(input_path, simu_name, output_path)
 
           #We get the .vtk file
+          #Need to get inside the folder
+          folder_name = data["windNinjaSimulations"]["wx_model_type"] #The partial name of the first folder
+          for f in os.listdir(output_path):
+               if folder_name in f :
+                    output_path += f + '/' #Get inside
+
+                    date_folder = self._date #The partial name of the second folder
+                    for x in ['-','_','/']:
+                         date_folder = date_folder.replace(x, '')
+                    
+                    for f2 in os.listdir(output_path):
+                         if date_folder in f2 : 
+                              output_path += f2 + '/'
+
           #Check if there is only 1 file
           files = file_list_by_extension(output_path, ".vtk")
           if len(files) != 2 :
@@ -215,7 +229,7 @@ class wind:
           self._nb_points = len(extrap_field)
 
           #We export the cube
-          assert self.export_wind_cube()
+          assert self.export_wind_cube(data["def"]["name"])
 
           #The simulation has worked 
           print("The wind cube is created")
@@ -248,7 +262,7 @@ class wind:
           self._list_point["y"] = np.array(data["list_point"]["y"])
           self._list_point["z"] = np.array(data["list_point"]["z"])
      
-     def export_wind_cube(self):
+     def export_wind_cube(self, name):
           """
           Create the .json file and stock it 
           Returns
@@ -256,7 +270,7 @@ class wind:
           int
                1 if the file has correctly been exported.
           """
-          name = self._folder_name + "/exported_data_" + self._date + ".json"
+          name = self._folder_name + "/exported_data_" + name + '_' + self._date + ".json"
           with open(name, "w+") as f:
                json.dump(self._convert2dico(), f)
                print("Export done")

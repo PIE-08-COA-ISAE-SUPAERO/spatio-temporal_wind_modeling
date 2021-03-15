@@ -4,11 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #%% Data gathering*
-folder = "C:/Users/abeil/source/repos/spatio-temporal_wind_modeling/data/Tests_airports/"
-aeroport = "LFBO"
+folder = "C:/Users/loic-/OneDrive/Bureau/AEROPORTS/"
+aeroport = ["LFRQ", "LFST", "LFRV"]
 
 d = wind.wind()
 
-d.create_wind_cube(folder+aeroport, aeroport, "")
+for i in aeroport:
+    d.create_wind_cube(folder + i, i)
 
 #%% Test

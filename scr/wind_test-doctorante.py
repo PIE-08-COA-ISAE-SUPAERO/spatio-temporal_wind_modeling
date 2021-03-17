@@ -1,5 +1,5 @@
 #%% DATA Gathering
-import TurboMaxWindElitePro as wind
+import wind_class as wind
 import numpy as np
 import matplotlib.pyplot as plt
 

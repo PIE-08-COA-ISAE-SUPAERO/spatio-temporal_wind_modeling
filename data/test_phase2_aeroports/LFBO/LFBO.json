@@ -14,8 +14,8 @@
 		"num_threads": 1,
 
 		"fetch_elevation": "terrain.tif",
-		"x_center": 43.6291,
-		"y_center": 1.3638,
+		"x_center": 1.3638,
+		"y_center": 43.6291,
 		"x_buffer": 1,
 		"y_buffer": 1,
 		"buffer_units": "kilometers",

@@ -74,7 +74,7 @@ class wind:
           #The date of the simulation
           self._date = ""
           
-          #The location of the wind cube : the southwesternmost point of the cube
+          #The location of the wind cube : the southwesternmost point of the cube : (latitude, longitude)
           self._location = [0,0]
           
           #The name of the folder
@@ -144,13 +144,12 @@ class wind:
                flag :Bool
                     A boolean which testify if the simulation has worked 
           """   
-
+          print('###########################')
+          print('# Beginning simulation')
+          print('###########################')
           flag = False
-
-          if output_path == "" : output_path = input_path
-                  
           if input_path[-1] != "/" : input_path += '/'
-          if output_path[-1] != "/" : output_path += '/'
+          if output_path == "" : output_path = input_path
 
           #We get the config file to extract some information         
           #Check if there is only 1 file
@@ -177,18 +176,17 @@ class wind:
 
           #We get the .vtk file
           #Need to get inside the folder
-          folder_name = data["windNinjaSimulations"]["wx_model_type"] #The partial name of the first folder
-          for f in os.listdir(output_path):
-               if folder_name in f :
-                    output_path += f + '/' #Get inside
-
-                    date_folder = self._date #The partial name of the second folder
-                    for x in ['-','_','/']:
-                         date_folder = date_folder.replace(x, '')
-                    
-                    for f2 in os.listdir(output_path):
-                         if date_folder in f2 : 
-                              output_path += f2 + '/'
+          flag = False
+          for f1 in os.listdir(output_path) :
+               if os.path.isdir(output_path + f1 + '/') :
+                    for f2 in os.listdir(output_path + f1 + '/') :
+                         if os.path.isdir(output_path + f1 + '/' + f2):
+                              path = file_list_by_extension(output_path + f1 + '/' + f2, '.nc') 
+                              if path != "" : 
+                                   output_path += f1 + '/' + f2 + '/'
+                                   flag = True
+                                   break
+               if flag : break
 
           #Check if there is only 1 file
           files = file_list_by_extension(output_path, ".vtk")
@@ -208,7 +206,7 @@ class wind:
           points, wind, surface = vtk.main(wind_file, surf_file)  
 
           #We find the location
-          self._location = [data["windNinjaSimulations"]["x_center"], data["windNinjaSimulations"]["y_center"]]
+          self._location = [data["windNinjaSimulations"]["y_center"], data["windNinjaSimulations"]["x_center"]]
           
           dx = - data["windNinjaSimulations"]["x_buffer"] * 1000 + points[0,0]
           dy = - data["windNinjaSimulations"]["y_buffer"] * 1000 + points[0,1]
@@ -228,12 +226,18 @@ class wind:
 
           self._nb_points = len(extrap_field)
 
+          print('###########################')
+          print('# Beginning export')
+          print('###########################')
           #We export the cube
           assert self.export_wind_cube(data["def"]["name"])
 
           #The simulation has worked 
-          print("The wind cube is created")
           flag = True
+
+          print('###########################')
+          print('# End of simulation, state = {}'.format(flag))
+          print('###########################')
           return flag 
 
      def import_wind_cube(self, file_name):
@@ -273,7 +277,6 @@ class wind:
           name = self._folder_name + "/exported_data_" + name + '_' + self._date + ".json"
           with open(name, "w+") as f:
                json.dump(self._convert2dico(), f)
-               print("Export done")
           return True
                
      def get_data(self):
@@ -730,7 +733,30 @@ class wind:
                3D-mesh for the interpolated surface altitude.
           """
           return plots.plot_wind_cube(self._wind_cube, xlim, ylim, zlim, nb_points, plot)
+     
+     def cube_coordinates(self):
+          """Return the min and max coordinates of the cube
 
+          Returns
+          -------
+          Dict
+              The coordinates
+          """          
+          lat_min, long_min = self._location
+          lat_max, long_max = coordinates_comput((lat_min, long_min), dx = np.max(self._list_point["x"])/1000, dy = np.max(self._list_point["y"])/1000)
+
+          output = {
+               "Latitude": {
+                    "min" : lat_min,
+                    "max" : lat_max
+               },
+               "Longitude" : {
+                    "min" : long_min,
+                    "max" : long_max
+               }
+          }
+
+          return output
 #---------------------------------------------------------
 # #%% AUXILIARY
 #---------------------------------------------------------

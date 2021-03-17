@@ -234,7 +234,7 @@ def main(points,wind,points_surf,elev_max, step):
     """
     # Printing start message
     print('###########################')
-    print('# Beginning extrapolation #')
+    print('# Beginning extrapolation ')
     print('###########################')
     # Decomposition along the axes
     X = np.array(points[:,0])

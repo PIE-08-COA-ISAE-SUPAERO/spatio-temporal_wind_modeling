@@ -21,9 +21,7 @@
 			"elevation_source":"world_srtm",
 			"mesh_choice":"coarse",
 
-
 			"time_zone":"Europe/Paris",
-
 
 			"initialization_method":"wxModelInitialization",
 			"wx_model_type":"NOMADS-GFS-GLOBAL-0.25-DEG",
@@ -34,8 +32,6 @@
 			"diurnal_winds":false,
 
 			"non_neutral_stability":false,
-
-
 
 			"output_speed_units":"kts",
 			"output_wind_height":30.0,

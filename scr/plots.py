@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 #plt.style.use('presentation.mplstyle')
 from mpl_toolkits.mplot3d import axes3d
+from matplotlib import cm
 from scipy.interpolate import LinearNDInterpolator
 import extrapolation as interp
 
@@ -41,7 +42,7 @@ def get_surf(X_range, Y_range):
     
     for i in range(len(X_range)):
         for j in range(len(Y_range)):
-            zpos = np.min(interp.get_Zlist_pos(X_range[i], Y_range[j], np.concatenate((data[:,0:2],np.reshape(Z_surf,(len(Z_surf),1))),axis=1))[1])
+            zpos = np.min(interp.get_Zlist_pos(X_range[i], Y_range[j], np.concatenate((data[:,0:2],np.reshape(Zsurf,(len(Zsurf),1))),axis=1))[1])
             Surf[j,i] = zpos;
     return X_surf, Y_surf, Surf
 
@@ -492,11 +493,11 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
         # Wind surface
         if axis == "z":
             # Checking altitude inside bounds
-            if alt < min(Z_surf):
+            if alt < min(Zsurf):
                 raise ValueError("Altitude below ground surface")
-            if alt > (max(Z_surf) + max(Z_tick)):
+            if alt > (max(Zsurf) + max(Z_tick)):
                 raise ValueError("Altitude exceed the maximum altitude of the domain")
-            if alt > (min(Z_surf) + max(Z_tick)):
+            if alt > (min(Zsurf) + max(Z_tick)):
                 raise Warning("Altitude exceed the maximum calculated elevation over the lowest point of the domain. Some points might not be interpolated")
             # Creating the limit arrays
             xlim = np.array([X_tick[0], X_tick[-1]])

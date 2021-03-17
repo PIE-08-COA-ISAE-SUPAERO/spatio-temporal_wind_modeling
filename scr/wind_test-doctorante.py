@@ -9,7 +9,7 @@ import xlrd
 import seaborn as sns
 
 #%%
-folder = 'G:/Mon Drive/PIE COA 08/Codes/TESTS/FICHIERS TESTS/Données doctorante/OUPUT DATA/H'
+folder = 'G:/Mon Drive/PIE COA 08/Codes/TESTS/FICHIERS TESTS/Données doctorante/OUTPUT DATA/H'
 coord_station = (43.1498753, 0.3560498)
 
 input_data_wb = xlrd.open_workbook('G:/Mon Drive/PIE COA 08/Codes/TESTS/FICHIERS TESTS/Données doctorante/INPUT DATA/data_test_doctorante.xls')

@@ -30,7 +30,7 @@ import numpy as np
 
 
 
-def open_file_grib(file_name):
+def open_file_grib(file_name , url):
     """
     
 
@@ -45,12 +45,15 @@ def open_file_grib(file_name):
         Returns true if the file is not readable (does not exist), else returns False.
 
     """
+    print("Two files to download")
     try:
         pygrib.open(file_name)
         print("File downloaded successfully")
         return False
     except:
-        print("Still downloading")
+        print("Still downloading \n")
+        print("Please copy paste the following link in another browser if the download did not start:" , url)
+        print("")
         return True
 
 
@@ -96,8 +99,8 @@ def get_grib_from_web(paquet_chosen,hour_chosen,downloads_path):
     webbrowser.open(site)
     file_name = 'W_fr-meteofrance,MODEL,AROME+001+{}+{}H_C_LFPW_{}0000--.grib2'.format(paquet_chosen,hour_chosen,date_format_2)
     file_and_path = downloads_path + '\\' + file_name
-    while open_file_grib(file_and_path) :
-        time.sleep(5)
+    while open_file_grib(file_and_path , site) :
+        time.sleep(10)
         
     return 
 
@@ -386,12 +389,12 @@ def main(hour_chosen,altitude_chosen,latitude_min,
     new_filename_2 = save_path
     print ('saving to ', new_filename_2)
     net.to_netcdf(path=new_filename_2)
-    dataset_1 = xr.open_dataset(new_filename_2)
+    #dataset_1 = xr.open_dataset(new_filename_2)
     
-    for key in dataset_1.keys():
+    '''for key in dataset_1.keys():
         print ('checking %s ' % key)
         print ('-- identical in dataset_2 and net_dataset : %s'\
-               % np.allclose(dataset_1[key], net[key], equal_nan=True))
+               % np.allclose(dataset_1[key], net[key], equal_nan=True))'''
     return df
 
     

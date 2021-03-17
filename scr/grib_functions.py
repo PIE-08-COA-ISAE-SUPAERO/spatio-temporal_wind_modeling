@@ -413,7 +413,7 @@ def main(hour_chosen,altitude_chosen,latitude_min,
 
     
 
-oui = main("03",10,45,45,10,11,'C:\\Users\\33658\\Downloads', 'C:\\Users\\33658\\Desktop\\Cours_3A\\PIE\\data\\test_output_SP1.nc','C:\\Users\\33658\\Desktop\\Cours_3A\\PIE\\data\\test_output_HP1.nc')
+#main("03",10,45,45,10,11,'C:\\Users\\33658\\Downloads', 'C:\\Users\\33658\\Desktop\\Cours_3A\\PIE\\data\\test_output_SP1.nc','C:\\Users\\33658\\Desktop\\Cours_3A\\PIE\\data\\test_output_HP1.nc')
 
 
 

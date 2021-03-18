@@ -288,7 +288,7 @@ class wind:
           """          
           return self._convert2dico()
      
-     def get_point(self, latitude, longitude, elevation = 0, altitude = 0, plot = True):
+     def get_point(self, latitude, longitude, elevation = 0, altitude = 0, plot = False):
           """Return the wind parameters at the specific position requested, with interpolation if needed and plot a wind rose if wished
           Parameters
 
@@ -432,7 +432,7 @@ class wind:
 
           return surface_alt
 
-     def turbulence(self, latitude, longitude, altitude, time, plot = True):
+     def turbulence(self, latitude, longitude, elevation, time, plot = True):
           """
           Return the wind parameters at the specific position requested with a random turbulence component  and plot a wind rose if wished
           Parameters
@@ -441,8 +441,8 @@ class wind:
                The latitude of the point wanted.
           longitude : double
                The longitude of the point wanted.
-          altitude : double
-               The altitude of the point wanted.
+          elevation : double
+               The elevation of the point wanted.
           time : double
                The relative time (seconds) since the initial time 
           plot : boolean
@@ -464,18 +464,15 @@ class wind:
                     The direction the wind came from, in ° 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, elevation= elevation)
           
-          #We get the altitude of the selected geographical point
-          surface_alt = self.get_surface_altitude(latitude, longitude)
-
-          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, surface_alt + 10)
+          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, elevation= 10)
 
           fs = 10 # frequence sampling
           N = int(time * fs) # Max number of modes
           
           # Table of random Fourier coefficients
-          altitude_correction = max((CORREC_ALTI - 1)/(1000 - 0)*altitude + 1, CORREC_ALTI)
+          altitude_correction = max((CORREC_ALTI - 1)/(1000 - 0)*elevation + 1, CORREC_ALTI)
           s_base = wind_10 * altitude_correction * CORREC_GLOBAL
           s_prin = RATIO_PRIN * s_base
           s_late = RATIO_LAT * s_base
@@ -486,12 +483,9 @@ class wind:
           for k in range(N):
                
                frequency = k/(2*N) * fs
-               s_prink = np.sqrt(time/(2*np.pi) * s_prin**2 * spectre_prin(frequency,\
-                                                            wind_speed_flat, altitude))
-               s_latek = np.sqrt(time/(2*np.pi) * s_late**2 * spectre_late(frequency,\
-                                                            wind_speed_flat, altitude))
-               s_wk = np.sqrt(time/(2*np.pi) * s_w**2 * spectre_w(frequency, \
-                                                            wind_speed_flat, altitude))
+               s_prink = np.sqrt(time/(2*np.pi) * s_prin**2 * spectre_prin(frequency, wind_speed_flat, elevation))
+               s_latek = np.sqrt(time/(2*np.pi) * s_late**2 * spectre_late(frequency, wind_speed_flat, elevation))
+               s_wk = np.sqrt(time/(2*np.pi) * s_w**2 * spectre_w(frequency, wind_speed_flat, elevation))
                x_prin = rd.normal(0, s_prink)
                x_late = rd.normal(0, s_latek)
                x_w = rd.normal(0, s_wk)
@@ -530,7 +524,7 @@ class wind:
           return(u, v, w, magnitude, magnitude_plan, direction)
 
 
-     def profil_turbulence(self, latitude, longitude, altitude, timestep, plot = True):
+     def profil_turbulence(self, latitude, longitude, elevation, timestep, plot = True):
           """
           Return the evolution of the speed of the wind at a specific point during 15 minutes
           Parameters
@@ -539,8 +533,8 @@ class wind:
                The latitude of the point wanted.
           longitude : double
                The longitude of the point wanted.
-          altitude : double
-               The altitude of the point wanted.
+          elevation : double
+               The elevation of the point wanted.
           timestep : double
                The time step (in seconds) between each value of the wind 
           plot : boolean
@@ -562,12 +556,9 @@ class wind:
                     The evolution of the vertical wind speed 
           """
           
-          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, altitude)
+          u, v, w, _, wind_speed_flat, direction = self.get_point(latitude, longitude, elevation= elevation)
           
-          #We get the altitude of the selected geographical point
-          surface_alt = self.get_surface_altitude(latitude, longitude)
-
-          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, surface_alt + 10)
+          _, _, _, _, wind_10, _ = self.get_point(latitude, longitude, elevation= 10)
           
           fs = 1/timestep # frequence sampling
           TEMPS_MAX = 900 # observation of the profile during 15 minutes
@@ -580,7 +571,7 @@ class wind:
           X_w = []
             
           # Ponderation of the impact of turbulence thanks to global coefficients
-          altitude_correction = max((CORREC_ALTI - 1)/(1000 - 0)*altitude + 1, CORREC_ALTI)
+          altitude_correction = max((CORREC_ALTI - 1)/(1000 - 0)*elevation + 1, CORREC_ALTI)
           s_base = wind_10 * altitude_correction * CORREC_GLOBAL
           s_prin = RATIO_PRIN * s_base
           s_late = RATIO_LAT * s_base
@@ -589,12 +580,9 @@ class wind:
             
           for k in range(N):
               frequency = k/(2*N) * fs
-              s_prink = np.sqrt(TIME_MAX/(2*np.pi) * s_prin**2 * spectre_prin(frequency,\
-                                                        wind_speed_flat, altitude))
-              s_latek = np.sqrt(TIME_MAX/(2*np.pi) * s_late**2 * spectre_late(frequency,\
-                                                            wind_speed_flat, altitude))
-              s_wk = np.sqrt(TIME_MAX/(2*np.pi) * s_w**2 * spectre_w(frequency, \
-                                                            wind_speed_flat, altitude))
+              s_prink = np.sqrt(TIME_MAX/(2*np.pi) * s_prin**2 * spectre_prin(frequency, wind_speed_flat, elevation))
+              s_latek = np.sqrt(TIME_MAX/(2*np.pi) * s_late**2 * spectre_late(frequency, wind_speed_flat, elevation))
+              s_wk = np.sqrt(TIME_MAX/(2*np.pi) * s_w**2 * spectre_w(frequency, wind_speed_flat, elevation))
               x_prin = rd.normal(0, s_prink)
               x_late = rd.normal(0, s_latek)
               x_w = rd.normal(0, s_wk)

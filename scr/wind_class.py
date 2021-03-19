@@ -36,7 +36,7 @@ D_LATW = 188.4
 
 TIME_MAX = 900
 
-CORREC_GLOBAL = 1/3
+CORREC_GLOBAL = 0.9
 CORREC_ALTI = 0.1
 RATIO_PRIN = 0.11
 RATIO_LAT = 0.11
@@ -944,13 +944,13 @@ def direction_plan(u, v):
     
     magnitude = np.sqrt(u**2 + v**2)
     angle = 180/np.pi * np.arccos(abs(u)/magnitude)
-    if u > 0 and v > 0 :
+    if u >= 0 and v >= 0 :
         direction = 270 - angle
-    if u > 0 and v < 0 :
+    if u >= 0 and v < 0 :
         direction = 270 + angle
     if u < 0 and v < 0 :
         direction = 90 - angle
-    if u < 0 and v > 0 :
+    if u < 0 and v >= 0 :
         direction = 90 + angle
     
     return(direction%360)

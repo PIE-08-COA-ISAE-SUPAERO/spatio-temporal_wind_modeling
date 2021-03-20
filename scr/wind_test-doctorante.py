@@ -9,10 +9,11 @@ import xlrd
 import seaborn as sns
 
 #%%
-folder = 'G:/Mon Drive/PIE COA 08/Codes/TESTS/FICHIERS TESTS/Données doctorante/OUTPUT DATA/H'
+ROOT = 'G:/Mon Drive/PIE COA 08/Codes/PGM/spatio-temporal_wind_modeling/spatio-temporal_wind_modeling/data/Test_phase1_doctorante/'
 coord_station = (43.1498753, 0.3560498)
 
-input_data_wb = xlrd.open_workbook('G:/Mon Drive/PIE COA 08/Codes/TESTS/FICHIERS TESTS/Données doctorante/INPUT DATA/data_test_doctorante.xls')
+folder = ROOT + 'OUTPUT DATA/H'
+input_data_wb = xlrd.open_workbook(ROOT + 'INPUT DATA/data_test_doctorante.xls')
 
 altitude_station = [30, 45, 60]
 N = 20
@@ -124,9 +125,10 @@ def print_err_simu(data, name, plot = True):
     #     sim = [i *1000 for i in sim]
     #     reel = [i*1000 for i in reel]
 
-    a, _, _, _ =  np.linalg.lstsq(reel[:,np.newaxis], sim)
+    # a, _, _, _ =  np.linalg.lstsq(reel[:,np.newaxis], sim)
 
-    a = a[0]
+    # a = a[0]
+    a = 1
     x = np.linspace(min(0,np.min(reel)), np.max(reel))
     y = a * x
 
@@ -144,15 +146,16 @@ def print_err_simu(data, name, plot = True):
         plt.xlabel('Réel (m/s)')
         plt.ylabel('Simulé (m/s)')
 
-        plt.title('Variable : ${}$, $a$ = {}, $r^2$ = {}'.format(name, int(a*1000)/1000, int(r[0,1]**2*1000)/1000))
+        # plt.title('Variable : ${}$, $a$ = {}, $r^2$ = {}'.format(name, int(a*1000)/1000, int(r[0,1]**2*1000)/1000))
+        plt.title('Variable : ${}$, $r^2$ = {}'.format(name, int(r[0,1]**2*1000)/1000))
         
         plt.legend()
         plt.show()
 
-# print_err_simu([U_Fin], 'u', False)
-# print_err_simu([V_Fin], 'v', False)
-# print_err_simu([W_Fin], 'w', False)
-# print_err_simu([Norme_Fin], 'norme', False)
-# print_err_simu([Norme_Plan_Fin], 'norme plane', False)
-# print_err_simu([U_Fin, V_Fin, W_Fin, Norme_Fin, Norme_Plan_Fin], 'total', False)
+print_err_simu([U_Fin], 'u', True)
+print_err_simu([V_Fin], 'v', False)
+print_err_simu([W_Fin], 'w', False)
+print_err_simu([Norme_Fin], 'norme', False)
+print_err_simu([Norme_Plan_Fin], 'norme plane', False)
+print_err_simu([U_Fin, V_Fin, W_Fin, Norme_Fin, Norme_Plan_Fin], 'total', False)
 

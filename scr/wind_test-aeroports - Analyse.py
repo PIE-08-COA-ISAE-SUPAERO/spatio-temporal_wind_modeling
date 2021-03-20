@@ -99,7 +99,6 @@ def err_droite(data, name, plot = True):
         plt.legend()
         plt.show()
 
-
 def print_err_simu(data, name, plot = True):
     
     data = np.transpose(np.array(data)) #[[sim], [reel]]
@@ -127,7 +126,8 @@ def print_err_simu(data, name, plot = True):
         plt.legend()
         plt.show()
 
-# err_droite(wind_speed, 'Vitesse', True)
+err_droite(wind_speed, 'Vitesse', True)
+err_droite(wind_direction, 'Direction', True)
 print_err_simu(wind_speed, 'Vitesse', True)
 print_err_simu(wind_direction, 'Direction', True)
 hist_err(wind_speed, 'vitesse')

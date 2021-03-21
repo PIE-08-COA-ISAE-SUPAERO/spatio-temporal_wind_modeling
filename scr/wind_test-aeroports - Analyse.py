@@ -13,7 +13,7 @@ import time
 ROOT = "G:/Mon Drive/PIE COA 08/Codes/PGM/spatio-temporal_wind_modeling/spatio-temporal_wind_modeling/data/test_phase2_aeroports/"
 
 liste_aeroport = ["LFBO", "LFKJ", "LFLP", "LFMY", "LFPB", "LFRC", "LFRQ", "LFRV", "LFST", "SOCA"]
-liste_folder = ["2021-03-17_1500", "2021-03-19_1800"]
+liste_folder = ["2021-03-17_1500", "2021-03-19_1800", "2021-03-21_0900"]
 
 fichier_aeroport = 'Liste_aeroports.csv'
 
@@ -23,6 +23,8 @@ N_aeroport = len(liste_aeroport)
 
 wind_speed = []
 wind_direction = []
+
+transition = 70
 
 wind_object = wind.wind()
 
@@ -43,7 +45,7 @@ for i in range(N_folder):
                 lon_aeroport = float(row[2])
                 lat_aeroport = float(row[3])
                 alt_aeroport = float(row[4])
-                wind_speed_aeroport = float(row[6])
+                wind_speed_aeroport = float(row[6]) if row[6] != '' else 0
                 wind_direction_aeroport = float(row[7]) if row[7] != '' else 0
 
                 #Get the wn data
@@ -51,10 +53,14 @@ for i in range(N_folder):
                 data_file = [_ for _ in files if 'exported' in _]
                 
                 wind_object.import_wind_cube(subfolder + data_file[0])
-                wn_point_param = wind_object.get_point(lat_aeroport, lon_aeroport, elevation = alt_aeroport, plot = False)
+                _,_,_,wn_wind_speed,_,wn_wind_direction = wind_object.get_point(lat_aeroport, lon_aeroport, elevation = alt_aeroport, plot = False)
                 
-                wind_speed.append([wn_point_param[-3], wind_speed_aeroport])
-                if row[7] != '' : wind_direction.append([wn_point_param[-1], wind_direction_aeroport])
+                if wind_direction_aeroport != 0 :
+                    if wn_wind_direction < transition and wind_direction_aeroport > 360 - transition : wn_wind_direction = 360 - wn_wind_direction
+                    if wind_direction_aeroport < transition and wn_wind_direction > 360 - transition : wind_direction_aeroport = 360 - wind_direction_aeroport
+
+                if row[6] != '' : wind_speed.append([wn_wind_speed, wind_speed_aeroport])
+                if row[7] != '' : wind_direction.append([wn_wind_direction, wind_direction_aeroport])
                 
                 print(row, (i_aeroport+1) / N_aeroport * 100, '%')
                 i_aeroport += 1
@@ -70,7 +76,7 @@ def hist_err(data_brute, name = ''):
     
     sns.distplot(data_ecart, bins = N)
     plt.ylabel('Probalbilité %')
-    plt.xlabel('Erreur commise (m/s)')
+    plt.xlabel('Erreur commise (°)')
     plt.show()
 
 def err_droite(data, name, plot = True):
@@ -84,7 +90,7 @@ def err_droite(data, name, plot = True):
     x = np.linspace(min(0,np.min(reel)), np.max(reel))
     y = a * x
 
-    print(name,' : ', r[0,1])
+    print(name,' : ', r[0,1], len(sim), 'elts')
     if plot :
         plt.figure(name)
         
@@ -94,7 +100,7 @@ def err_droite(data, name, plot = True):
         plt.xlabel('Réel (m/s)')
         plt.ylabel('Simulé (m/s)')
 
-        plt.title('Variable : ${}$, $a$ = {} (forcé), $r^2$ = {}'.format(name, int(a*1000)/1000, int(r[0,1]**2*1000)/1000))
+        plt.title('Variable : ${}$, $r^2$ = {}'.format(name, int(r[0,1]**2*1000)/1000))
         
         plt.legend()
         plt.show()
@@ -111,7 +117,7 @@ def print_err_simu(data, name, plot = True):
     x = np.linspace(min(0,np.min(reel)), np.max(reel))
     y = a * x
 
-    print(name,' : ', r[0,1])
+    print(name,' : ', r[0,1], len(data), 'elts')
     if plot :
         plt.figure(name)
         
@@ -126,8 +132,9 @@ def print_err_simu(data, name, plot = True):
         plt.legend()
         plt.show()
 
-err_droite(wind_speed, 'Vitesse', True)
-err_droite(wind_direction, 'Direction', True)
-print_err_simu(wind_speed, 'Vitesse', True)
-print_err_simu(wind_direction, 'Direction', True)
-hist_err(wind_speed, 'vitesse')
+# err_droite(wind_speed, 'Vitesse', True)
+# err_droite(wind_direction, 'Direction', True)
+# print_err_simu(wind_speed, 'Vitesse', True)
+# print_err_simu(wind_direction, 'Direction', True)
+# hist_err(wind_speed, 'vitesse')
+hist_err(wind_direction, 'direction')

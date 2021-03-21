@@ -11,8 +11,8 @@ import time
 
 # Data gathering
 folder = "C:/Users/loic-/OneDrive/Bureau/TPLTE/"
-aeroport = ["LFBO", "LFKJ", "LFLP", "LFMY", "LFPB", "LFRC", "LFRQ", "LFRV", "LFST", "SOCA"]
-
+# aeroport = ["LFBO", "LFKJ", "LFLP", "LFMY", "LFPB", "LFRC", "LFRQ", "LFRV", "LFST", "SOCA"]
+aeroport = ["LFLP", "LFMY", "LFPB", "LFRC", "LFRQ", "LFRV", "LFST", "SOCA"]
 
 debut = time.clock()
 temps = []

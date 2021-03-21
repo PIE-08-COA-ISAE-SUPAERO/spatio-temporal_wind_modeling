@@ -15,7 +15,7 @@ from matplotlib import cm
 from scipy.interpolate import LinearNDInterpolator
 import extrapolation as interp
 
-#%% Cube de vent
+#%% Wind cube
 def get_surf(X_range, Y_range):
     """
     Create the arrays for the surface plot.
@@ -330,7 +330,7 @@ def plot_wind_cube(wind_cube, xlim, ylim, zlim, nb_points, plot):
     global data
     data = np.concatenate((data_points, data_wind, Zsurf),axis=1)
 
-    #Récupération du maillage horizontal
+    # Retrieving the horizontal mesh
     global X
     X = data[:,0]
     global Y
@@ -414,7 +414,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
     global data 
     data = np.concatenate((data_points, data_wind, Zsurf),axis=1)
 
-    #Récupération du maillage horizontal
+    # Retrieving the horizontal mesh
     global X
     X = data[:,0]
     global Y
@@ -550,3 +550,194 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
                 plt.grid()
                 plt.show()
     return X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp
+
+
+
+
+def plot_wind_cube_turbulent(wind_cube, xlim, ylim, zlim, T, dt, nb_points,  plot):
+    """
+    
+    Calculate a wind_cube with turbulence inside the wind_cube and plots it if 
+    needed (if the number of iteration is reasonnable).
+
+    Parameters
+    ----------
+    wind_cube : wind_cube
+        The wind cube on which the interpolation will be done.
+    xlim : Narray of floats
+        Numpy array of size 2 containing the limits of the x-axis range.
+    ylim : Narray of floats
+        Numpy array of size 2 containing the limits of the y-axis range.
+    zlim : Narray of floats
+        Numpy array of size 2 containing the limits of the z-axis range. In elevation convention.
+    nb_points : int
+        Number of output points along x and y axes. Default = 10.
+    T : float
+        duration of observation of the wind speed.
+    dt : float
+        timestep of the computation
+    plot : Bool
+        Activates the plot option. Default = False.
+        
+    Returns
+    -------
+    cube_list : list of 6 Narray containing the evolution of the wind speed in time :
+        X_mesh : Narray of floats
+            3D-mesh for the interpolated x coordinates.
+        Y_mesh : Narray of floats
+            3D-mesh for the interpolated x coordinates.
+        Z_mesh : Narray of floats
+            3D-mesh for the interpolated x coordinates. In elevation convention.
+        Uinterp : Narray of floats
+            3D-mesh for the interpolated wind speed component along x-axis.
+        Vinterp : Narray of floats
+            3D-mesh for the interpolated wind speed component along y-axis.
+        Winterp : Narray of floats
+            3D-mesh for the interpolated wind speed component along z-axis.
+
+    """
+    global data_points
+    data_points = wind_cube["Position"]
+    global data_wind
+    data_wind = wind_cube["Wind_speed"]
+    global Zsurf
+    Zsurf = wind_cube["Surface_altitude"].reshape(-1,1)
+    global data
+    data = np.concatenate((data_points, data_wind, Zsurf),axis=1)
+
+    #Récupération du maillage horizontal
+    
+    global X
+    X = data[:,0]
+    global Y
+    Y = data[:,1]
+    global X_tick
+    X_tick = np.unique(X)
+    global Y_tick
+    Y_tick = np.unique(Y)
+    global Z_tick
+    Z_tick = interp.get_Zlist_pos(X_tick[0], Y_tick[0], data[:,0:3])[1]
+    
+    # Interpolation
+    
+    X_mesh, Y_mesh, Z_mesh, Uinterp, Vinterp, Winterp, Sinterp = get_interp_data(xlim,ylim,zlim,nb_points,False)
+    
+    # Preparation of the values for turbulence
+    
+    fs = 10
+    N = 120
+    Ntheta = 25
+    df, dtheta = fs/2 / N, np.pi / Ntheta
+    nb_iter = int(T/dt) + 1
+    if nb_iter > 15 :
+        print("Too much iteration ! No images will be generated")
+        plot = False
+    
+    # Getting the mean and direction on each elevation
+        
+    cube_list = [0 for k in range(nb_iter)]
+    list_Uz = []
+    list_dz = []
+    tableau_Sprin = []
+    tableau_Slate = []
+    tableau_Svert = []
+    
+    for z in range(np.shape(Z_mesh)[0]) :
+        hauteur = Z_mesh[0,0,z]
+        Umoy = 0
+        dmoy = 0
+        count = 0
+        for x in range(np.shape(X_mesh)[0]) :
+            for y in range(np.shape(Y_mesh)[0]) :
+                u, v = Uinterp[x,y,z], Vinterp[x,y,z]
+                norme = np.sqrt(u**2 + v**2)
+                direction = np.arccos(abs(u)/norme)
+                if v < 0 :
+                    direction = - direction
+                count = count + 1
+                Umoy = Umoy + norme
+                dmoy = dmoy + direction
+        Umoy = Umoy / count
+        dmoy = dmoy / count
+        list_Uz.append(Umoy)
+        list_dz.append(dmoy)
+        
+        altitude_correction = max((CORREC_ALTI - 1)/(1000 - 0)*hauteur + 1, CORREC_ALTI)
+        s_base = Umoy * altitude_correction * CORREC_GLOBAL
+        s_prin = RATIO_PRIN * s_base
+        s_late = RATIO_LAT * s_base
+        s_w = RATIO_VERT * s_base
+        X_prin, X_late, X_vert = [], [], []
+        
+        for k in range(N):
+            frequency = k/(2*N) * fs
+            s_prink = np.sqrt(TIME_MAX/(2*np.pi) * s_prin**2 * spectre_prin(frequency,\
+                                                        Umoy, hauteur))
+            s_latek = np.sqrt(TIME_MAX/(2*np.pi) * s_late**2 * spectre_late(frequency,\
+                                                        Umoy, hauteur))
+            s_wk = np.sqrt(TIME_MAX/(2*np.pi) * s_w**2 * spectre_w(frequency, \
+                                                        Umoy, hauteur))
+            X_prin.append(s_prink)
+            X_late.append(s_latek)
+            X_vert.append(s_wk)
+        
+        tableau_Sprin.append(X_prin)
+        tableau_Slate.append(X_late)
+        tableau_Svert.append(X_vert)
+    
+    Psi = rd.uniform(0, 2*np.pi, N * Ntheta + 1)
+    
+    # Computing for each timestep the wind cube
+    
+    for t in range(1, nb_iter + 1):
+        
+        Ut = Uinterp.copy()
+        Vt = Vinterp.copy()
+        Wt = Winterp.copy()
+        
+        for x in range(np.shape(X_mesh)[0]) :
+            for y in range(np.shape(Y_mesh)[0]) :
+                for z in range(np.shape(Z_mesh)[0]) :
+                    coordx = X_mesh[x,y,z]
+                    coordy = Y_mesh[x,y,z]
+                    coordz = Z_mesh[x,y,z]
+                    u = Uinterp[x, y, z]
+                    v = Vinterp[x, y, z]
+                    w = Winterp[x, y, z]
+                    
+                    coordx_prin = np.cos(list_dz[z]) * coordx - np.sin(list_dz[z]) * coordy
+                    coordx_late = np.sin(list_dz[z]) * coordx + np.cos(list_dz[z]) * coordy
+                    uprin, ulate, uvert = 0, 0, 0
+                    windmoy = list_Uz[z]
+                    for k in range(N) :
+                        for kk in range(Ntheta):
+                            uprin = uprin + np.sqrt(4/np.pi * tableau_Sprin[z][k] * 2*np.pi* df * dtheta * (np.cos(-np.pi/2 + kk * dtheta))**2) * np.cos(2*np.pi*k*df/windmoy * coordx_prin * np.cos(-np.pi/2 + kk * dtheta) + 2*np.pi*k*df/windmoy * coordx_late * np.sin(-np.pi/2 + kk * dtheta) - 2*np.pi*k*df * t*dt + Psi[k*Ntheta + kk]) 
+                            ulate = ulate + np.sqrt(4/np.pi * tableau_Slate[z][k] * 2*np.pi* df * dtheta * (np.cos(-np.pi/2 + kk * dtheta))**2) * np.cos(2*np.pi*k*df/windmoy * coordx_prin * np.cos(-np.pi/2 + kk * dtheta) + 2*np.pi*k*df/windmoy * coordx_late * np.sin(-np.pi/2 + kk * dtheta) - 2*np.pi*k*df * t*dt + Psi[k*Ntheta + kk]) 
+                            uvert = uvert + np.sqrt(4/np.pi * tableau_Svert[z][k] * 2*np.pi* df * dtheta * (np.cos(-np.pi/2 + kk * dtheta))**2) * np.cos(2*np.pi*k*df/windmoy * coordx_prin * np.cos(-np.pi/2 + kk * dtheta) + 2*np.pi*k*df/windmoy * coordx_late * np.sin(-np.pi/2 + kk * dtheta) - 2*np.pi*k*df * t*dt + Psi[k*Ntheta + kk]) 
+                    
+                    unew = u + np.cos(list_dz[z]) * uprin - np.sin(list_dz[z]) * ulate
+                    vnew = v + np.sin(list_dz[z]) * uprin + np.cos(list_dz[z]) * ulate
+                    wnew = w + uvert
+                    
+                    Ut[x, y, z] = unew
+                    Vt[x, y, z] = vnew
+                    Wt[x, y, z] = wnew
+        
+        cube_list.append([X_mesh, Y_mesh, Z_mesh, Ut, Vt, Wt])
+        
+        if plot == True:
+            X_range, Y_range, Z_range = get_interv(xlim, ylim, zlim)
+            X_surf, Y_surf, Surf = get_surf(X_range, Y_range)
+            fig = plt.figure(figsize=(16,10)) 
+            ax = fig.gca(projection="3d")
+            ax.plot_surface(X_surf,Y_surf, Surf, cmap=cm.terrain)
+            ax.quiver(X_mesh, Y_mesh, Z_mesh+Sinterp, Uinterp, Vinterp, Winterp, color = "limegreen", length=max(X_mesh[0,:,0])/400, label = "Steady")
+            ax.quiver(X_mesh, Y_mesh, Z_mesh+Sinterp, Ut, Vt, Wt, color = "red", length=max(X_mesh[0,:,0])/400, label = "Turbulent")
+            ax.set_zlim([max(0,min(Sinterp[0,0,:])),max(2000+min((Z_mesh+Sinterp)[0,0,:]),max((Z_mesh+Sinterp)[0,0,:]))])
+            ax.legend() 
+            plt.ion()
+            plt.xlabel("x (m)")
+            plt.ylabel("y (m)")
+            plt.show()
+    
+    return(cube_list)

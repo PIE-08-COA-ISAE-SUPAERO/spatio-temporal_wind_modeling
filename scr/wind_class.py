@@ -801,11 +801,11 @@ def flat_distance_point(point1, point2):
      (lat1, long1) = point1
      (lat2, long2) = point2
      
-     dlat = np.deg2rad(abs(lat1-lat2)/2)
-     dlong = np.deg2rad(abs(long1-long2)/2)
+     dlat = np.deg2rad(abs(lat1-lat2))
+     dlong = np.deg2rad(abs(long1-long2))
      
-     dx = 2 * R_terre * np.sin(dlong)
-     dy = 2 * R_terre * np.sin(dlat)
+     dx = R_terre * np.sin(dlong) * np.cos(np.deg2rad(lat2))
+     dy = R_terre * np.sin(dlat)
      
      return dx, dy
 
@@ -826,8 +826,8 @@ def coordinates_comput(point, dx = 0, dy = 0):
      Tuple
          The corrdinates of the final point.
      """     
-     lat = point[0] + 2 * np.rad2deg(np.arcsin(dy/2/R_terre))
-     lon = point[1] + 2 * np.rad2deg(np.arcsin(dx/2/R_terre))
+     lat = point[0] + np.rad2deg(np.arcsin(dy/R_terre))
+     lon = point[1] + np.rad2deg(np.arcsin(dx/(R_terre*np.cos(np.deg2rad(lat)))))
 
      return lat, lon
 

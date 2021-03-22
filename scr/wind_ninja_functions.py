@@ -24,12 +24,7 @@ def main(input_path: str, simu_name: str, output_path: str):
                     The input folder doesn't exist, or
                     The configuration file .json doesn't exist, or
                     The terrain file .tif doesn't exist, or
-                    The wind file .??? doesn't exist, or
-
-        ATTENTION
-        ---------
-        Make sure that there is the WindNinja adress
-        C:\\WindNinja\\WindNinja-3.7.1\\bin\\WindNinja_cli
+                    The wind file .nc doesn't exist, or
         """
     import os, json, shutil
 
@@ -85,9 +80,9 @@ def main(input_path: str, simu_name: str, output_path: str):
             shutil.copyfile(input_path + tif_file, output_path + tif_file)
 
     #Once the .json file is read it will get the grib file's and copy it in the simulation folder
-    if grib_file and input_path != output_path:
-        # Verify if the wind file .??? exist
-        wind_files: List[str] = [pos_wind for pos_wind in os.listdir(input_path) if pos_wind.endswith('.wind')]
+    if wind_file and input_path != output_path:
+        # Verify if the wind file .nc exist
+        wind_files: List[str] = [pos_wind for pos_wind in os.listdir(input_path) if pos_wind.endswith('.nc')]
         if not wind_files:
             print("Input .wind file doesn't exist!")
             return False

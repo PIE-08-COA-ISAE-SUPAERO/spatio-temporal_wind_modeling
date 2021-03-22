@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\data"
+    "\\data",
+    "\\scr"
   ],
-  "SelectedNode": "\\CREDITS.md",
+  "SelectedNode": "\\configFile.json",
   "PreviewInSolutionExplorer": false
 }

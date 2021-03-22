@@ -377,7 +377,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
         Type of interpoltion to do. "z" for a wind surface, "x" or "y" for a
         wind profile.
     coord : Narray of float
-        Coordinates of the point for the wind profile.
+        Coordinates of the point for the wind profile. In GPS coordinates.
     alt : float
         Altitude for the wind surface. Must be the altitude above sea level.
         If wind profile required, elevation above ground max for the plot. 
@@ -389,20 +389,20 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
     Returns
     -------
     X_mesh : Narray of floats
-        3D-mesh for the interpolated x coordinates.
+        Interpolated x coordinates. 1D list.
     Y_mesh : Narray of floats
-        3D-mesh for the interpolated x coordinates.
+        Interpolated y coordinates. 1D list
     Z_mesh : Narray of floats
-        3D-mesh for the interpolated x coordinates. In elevation convention for the 
-        wind_profile and altitude convention for the xind_surface.
+        Interpolated z coordinates. 1D lis in elevation convention for 
+        the wind_profile and altitude convention for the wind_surface.
     Uinterp : Narray of floats
-        3D-mesh for the interpolated wind speed component along x-axis.
+        1D array for the interpolated wind speed component along x-axis.
     Vinterp : Narray of floats
-        3D-mesh for the interpolated wind speed component along y-axis.
+        1D array for the interpolated wind speed component along y-axis.
     Winterp : Narray of floats
-        3D-mesh for the interpolated wind speed component along z-axis.
+        1D array for the interpolated wind speed component along z-axis.
     Sinterp : Narray of floats
-        3D-mesh for the interpolated surface altitude.
+        1D array for the interpolated surface altitude.
 
     """
     global data_points

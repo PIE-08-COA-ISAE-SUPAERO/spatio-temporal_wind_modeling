@@ -653,36 +653,39 @@ class wind:
           """
           Calculates a wind profile or a wind surface from the wind_cube.
           Parameters
-          ----------
-          axis : string
-               Type of interpoltion to do. "z" for a wind surface, "x" or "y" for a
-               wind profile.
-          coord : Narray of float
-               Coordinates of the point for the wind profile.
-          alt : float
-               Altitude for the wind surface. Must be the altitude above sea level.
-               If wind profile required, elevation above ground max for the plot. 
-          nb_points : int
-               Number of output points along x and y axes. Default = 10.
-          plot : Bool
-               Activates the plot option. Default = False.
-          Returns
-          -------
-          X_mesh : Narray of floats
-               3D-mesh for the interpolated x coordinates.
-          Y_mesh : Narray of floats
-               3D-mesh for the interpolated x coordinates.
-          Z_mesh : Narray of floats
-               3D-mesh for the interpolated x coordinates. In elevation convention for a wind_profile, 
-               in altitude convention for a wind_surface.
-          Uinterp : Narray of floats
-               3D-mesh for the interpolated wind speed component along x-axis.
-          Vinterp : Narray of floats
-               3D-mesh for the interpolated wind speed component along y-axis.
-          Winterp : Narray of floats
-               3D-mesh for the interpolated wind speed component along z-axis.
-          Sinterp : Narray of floats
-               3D-mesh for the interpolated surface altitude.
+            ----------
+            wind_cube : wind_cube
+                The wind cube on which the interpolation will be done.
+            axis : string
+                Type of interpoltion to do. "z" for a wind surface, "x" or "y" for a
+                wind profile.
+            coord : Narray of float
+                Coordinates of the point for the wind profile. In GPS coordinates.
+            alt : float
+                Altitude for the wind surface. Must be the altitude above sea level.
+                If wind profile required, elevation above ground max for the plot. 
+            nb_points : int
+                Number of output points along x and y axes. Default = 10.
+            plot : Bool
+                Activates the plot option. Default = False.
+
+            Returns
+            -------
+            X_mesh : Narray of floats
+                Interpolated x coordinates. 1D list.
+            Y_mesh : Narray of floats
+                Interpolated y coordinates. 1D list
+            Z_mesh : Narray of floats
+                Interpolated z coordinates. 1D lis in elevation convention for 
+                the wind_profile and altitude convention for the wind_surface.
+            Uinterp : Narray of floats
+                1D array for the interpolated wind speed component along x-axis.
+            Vinterp : Narray of floats
+                1D array for the interpolated wind speed component along y-axis.
+            Winterp : Narray of floats
+                1D array for the interpolated wind speed component along z-axis.
+            Sinterp : Narray of floats
+                1D array for the interpolated surface altitude.
           """
           coordxy_tuple = flat_distance_point(self._location, coord)
           return plots.plot_wind_surface(self._wind_cube, axis, [coordxy_tuple[0],coordxy_tuple[1]], alt, nb_points, plot)
@@ -694,10 +697,13 @@ class wind:
           ----------
           xlim : Narray of floats
                Numpy array of size 2 containing the limits of the x-axis range.
+               It must be in meters from the bottom left corner of the domain.
           ylim : Narray of floats
                Numpy array of size 2 containing the limits of the y-axis range.
+               It must be in meters from the bottom left corner of the domain.
           zlim : Narray of floats
                Numpy array of size 2 containing the limits of the z-axis range.
+               In elevation above ground convention
           nb_points(optional) : int
                Number of output points along x and y axes. Default = 10.
           plot(optional) : Bool

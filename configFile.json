@@ -22,8 +22,6 @@
 		"mesh_choice": "medium",
 		"time_zone": "Europe/Paris",
 		
-		"diurnal_winds": false,
-		
 		"non_neutral_stability": false,
 
 		"initialization_method": "wxModelInitialization",

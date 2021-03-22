@@ -4,7 +4,7 @@
 		"name":"LFBO",
 		"date": "2021-03-15",
 		"mntFile":false,
-		"gribFile":false
+		"windFile":false
 	},
 	"extrapolation":{
 		"nb_layer_extrapolation": 5,

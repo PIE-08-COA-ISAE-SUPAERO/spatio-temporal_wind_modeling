@@ -393,7 +393,7 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
     Y_mesh : Narray of floats
         Interpolated y coordinates. 1D list
     Z_mesh : Narray of floats
-        Interpolated z coordinates. 1D lis in elevation convention for 
+        Interpolated z coordinates. 1D list in elevation convention for 
         the wind_profile and altitude convention for the wind_surface.
     Uinterp : Narray of floats
         1D array for the interpolated wind speed component along x-axis.
@@ -566,8 +566,10 @@ def plot_wind_cube_turbulent(wind_cube, xlim, ylim, zlim, T, dt, nb_points,  plo
         The wind cube on which the interpolation will be done.
     xlim : Narray of floats
         Numpy array of size 2 containing the limits of the x-axis range.
+        It must be in meters from the bottom left corner.
     ylim : Narray of floats
         Numpy array of size 2 containing the limits of the y-axis range.
+        It must be in meters from the bottom left corner.
     zlim : Narray of floats
         Numpy array of size 2 containing the limits of the z-axis range. In elevation convention.
     nb_points : int

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Wind Ninja simulation.
 This module contains all the functions required to launch the wind ninja simulation.
-@author: A. Liberal Cavalcanti (20201
+@author: A. Liberal Cavalcanti (March 2021)
 """
 from typing import List
 
@@ -82,13 +82,13 @@ def main(input_path: str, simu_name: str, output_path: str):
     #Once the .json file is read it will get the grib file's and copy it in the simulation folder
     if wind_file and input_path != output_path:
         # Verify if the wind file .nc exist
-        wind_files: List[str] = [pos_wind for pos_wind in os.listdir(input_path) if pos_wind.endswith('.nc')]
-        if not wind_files:
-            print("Input .wind file doesn't exist!")
+        nc_files: List[str] = [pos_nc for pos_nc in os.listdir(input_path) if pos_nc.endswith('.nc')]
+        if not nc_files:
+            print("Input .nc file doesn't exist!")
             return False
         else:
-            wind_file: str = wind_files[0]
-            shutil.copyfile(input_path + wind_file, output_path + wind_file)
+            nc_file: str = nc_files[0]
+            shutil.copyfile(input_path + nc_file, output_path + nc_file)
 
     # Write the .cfg, input config file of windNinja
     cfg_path = output_path + simu_name + '.cfg'

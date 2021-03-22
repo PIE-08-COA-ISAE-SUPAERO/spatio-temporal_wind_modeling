@@ -65,7 +65,7 @@ def main(input_path: str, simu_name: str, output_path: str):
         version: str = config_text['def']['version']
         date: str = config_text['def']['date']
         mnt_file: bool = config_text['def']['mntFile']
-        grib_file: bool = config_text['def']['gribFile']
+        wind_file: bool = config_text['def']['windFile']
         wind_ninja_simulation = config_text['windNinjaSimulations']
 
 
@@ -79,7 +79,7 @@ def main(input_path: str, simu_name: str, output_path: str):
             tif_file: str = tif_files[0]
             shutil.copyfile(input_path + tif_file, output_path + tif_file)
 
-    #Once the .json file is read it will get the grib file's and copy it in the simulation folder
+    #Once the .json file is read it will get the wind file's and copy it in the simulation folder
     if wind_file and input_path != output_path:
         # Verify if the wind file .nc exist
         nc_files: List[str] = [pos_nc for pos_nc in os.listdir(input_path) if pos_nc.endswith('.nc')]

@@ -793,16 +793,16 @@ def flat_distance_point(point1, point2):
      Returns
      -------
      dx : double
-          The distance over the x axis (along the east-west direction).
+          The distance over the x axis in km (along the east-west direction).
      dy : double
-          The distance over the y axis (along the north-south direction).
+          The distance over the y axis in km (along the north-south direction).
      """
      
      (lat1, long1) = point1
      (lat2, long2) = point2
      
-     dlat = abs(lat1-lat2)/2
-     dlong = abs(long1-long2)/2
+     dlat = np.deg2rad(abs(lat1-lat2)/2)
+     dlong = np.deg2rad(abs(long1-long2)/2)
      
      dx = 2 * R_terre * np.sin(dlong)
      dy = 2 * R_terre * np.sin(dlat)

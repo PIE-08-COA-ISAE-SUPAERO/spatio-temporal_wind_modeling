@@ -553,6 +553,77 @@ def plot_wind_surface(wind_cube, axis, coord, alt, nb_points, plot):
 
 
 
+def spectre_prin_p(frequency, speed, altitude):
+    
+    """
+    Return the DSP of the principal wind speed
+    Parameters
+    ----------
+    frequency : double
+         The frequency of the component expected.
+    speed : double
+         The stationnary speed of the wind at the point wanted.
+    altitude : double
+         The altitude of the point wanted.  
+    Returns
+    -------
+    S : double 
+         The value of the DSP for these parameters
+    """
+    
+    lu = altitude/((A_Z+B_Z*altitude)**(C_Z))
+    S = 4*lu/speed * 1/((1 + D_PRIN*(frequency*lu/speed)**2)**(PENTE_PRIN))
+    
+    return(S)
+
+
+def spectre_late_p(frequency, speed, altitude):
+    
+    """
+    Return the DSP of the lateral wind speed
+    Parameters
+    ----------
+    frequency : double
+         The frequency of the component expected.
+    speed : double
+         The stationnary speed of the wind at the point wanted.
+    altitude : double
+         The altitude of the point wanted.  
+    Returns
+    -------
+    S : double 
+         The value of the DSP for these parameters
+    """
+    
+    lv = altitude/((A_Z+B_Z*altitude)**(C_Z))
+    S = 4*lv/speed * (1 + D_LATW*(2*frequency*lv/speed)**2)/((1 + D_PRIN*(2*frequency*lv/speed)**2)**(PENTE_LATW))
+    
+    return(S)
+
+
+def spectre_w_p(frequency, speed, altitude):
+    
+    """
+    Return the DSP of the vertical wind speed
+    Parameters
+    ----------
+    frequency : double
+         The frequency of the component expected.
+    speed : double
+         The stationnary speed of the wind at the point wanted.
+    altitude : double
+         The altitude of the point wanted.  
+    Returns
+    -------
+    S : double 
+         The value of the DSP for these parameters
+    """
+    
+    lw = altitude
+    S = 4*lw/speed * (1 + D_LATW*(2*frequency*lw/speed)**2)/((1 + D_PRIN*(2*frequency*lw/speed)**2)**(PENTE_LATW))
+    
+    return(S)
+
 
 def plot_wind_cube_turbulent(wind_cube, xlim, ylim, zlim, T, dt, nb_points,  plot):
     """
@@ -673,11 +744,11 @@ def plot_wind_cube_turbulent(wind_cube, xlim, ylim, zlim, T, dt, nb_points,  plo
         
         for k in range(N):
             frequency = k/(2*N) * fs
-            s_prink = np.sqrt(TIME_MAX/(2*np.pi) * s_prin**2 * spectre_prin(frequency,\
+            s_prink = np.sqrt(TIME_MAX/(2*np.pi) * s_prin**2 * spectre_prin_p(frequency,\
                                                         Umoy, hauteur))
-            s_latek = np.sqrt(TIME_MAX/(2*np.pi) * s_late**2 * spectre_late(frequency,\
+            s_latek = np.sqrt(TIME_MAX/(2*np.pi) * s_late**2 * spectre_late_p(frequency,\
                                                         Umoy, hauteur))
-            s_wk = np.sqrt(TIME_MAX/(2*np.pi) * s_w**2 * spectre_w(frequency, \
+            s_wk = np.sqrt(TIME_MAX/(2*np.pi) * s_w**2 * spectre_w_p(frequency, \
                                                         Umoy, hauteur))
             X_prin.append(s_prink)
             X_late.append(s_latek)

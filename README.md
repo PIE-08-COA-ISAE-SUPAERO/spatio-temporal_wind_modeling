@@ -6,12 +6,12 @@ L'aéro-largage de colis équipés de parachutes a un fort enjeu stratégique, �
 The airdrop of packages with parachute is a strategic challenge, both military and civilian : to be able to drop from the highest possible altitude with the narrowest impact dispersion possible. However, the wind tends to distub the anticipated trajectories of the packages, so much that its modelling becomes mandatory with a great accuracy. Our program allows, with the input of weather forecast and the topography of the area to create a spatio-temporal wind field.
 
 
-Directories:
+Répertoire :
 <!-- * autotest    -> testing suite -->
 <!-- * cmake       -> cmake support scripts -->
- * src         -> source files
+ * src         -> Code source
 
-Dependencies (versions are versions we build against):
+Pré-requis :
  * [WindNinja](https://github.com/firelab/windninja)
     * [Building on Windows](https://github.com/firelab/windninja/wiki/Building-WindNinja-on-Windows-using-the-MSVC-compiler-and-gisinternals.com-dependencies)
  * [pyGrib](https://github.com/jswhit/pygrib)

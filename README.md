@@ -8,7 +8,6 @@ Le vent a un impact important sur la stabilité et la manoeuvrabilité des UAV e
 Directories:
 <!-- * autotest    -> testing suite -->
 <!-- * cmake       -> cmake support scripts -->
- * data        -> testing data
  * doc         -> documentation
  * images      -> splash image and icons for gui
  * src         -> source files

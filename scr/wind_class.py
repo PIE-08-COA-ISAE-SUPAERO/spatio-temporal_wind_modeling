@@ -176,25 +176,38 @@ class wind:
 
           #We get the .vtk file
           #Need to get inside the folder
+          vtk_path = input_path
           flag = False
-          for f1 in os.listdir(output_path) :
-               if os.path.isdir(output_path + f1 + '/') :
-                    for f2 in os.listdir(output_path + f1 + '/') :
-                         if os.path.isdir(output_path + f1 + '/' + f2):
-                              path = file_list_by_extension(output_path + f1 + '/' + f2, '.nc') 
+          for f1 in os.listdir(input_path) :
+               if os.path.isdir(input_path + f1 + '/') :
+                    for f2 in os.listdir(input_path + f1 + '/') :
+                         if os.path.isdir(input_path + f1 + '/' + f2):
+                              path = file_list_by_extension(input_path + f1 + '/' + f2, '.vtk') 
                               if path != "" : 
-                                   output_path += f1 + '/' + f2 + '/'
+                                   vtk_path += f1 + '/' + f2 + '/'
                                    flag = True
                                    break
                if flag : break
+          
+          if not flag :
+               for f1 in os.listdir(output_path) :
+                    if os.path.isdir(output_path + f1 + '/') :
+                         for f2 in os.listdir(output_path + f1 + '/') :
+                              if os.path.isdir(output_path + f1 + '/' + f2):
+                                   path = file_list_by_extension(output_path + f1 + '/' + f2, '.vtk') 
+                                   if path != "" : 
+                                        vtk_path += f1 + '/' + f2 + '/'
+                                        flag = True
+                                        break
+                    if flag : break
 
           #Check if there is only 1 file
-          files = file_list_by_extension(output_path, ".vtk")
+          files = file_list_by_extension(vtk_path, ".vtk")
           if len(files) != 2 :
                print("There is an error in the simulation")
                return flag
           
-          wind_file  = surf_file = output_path
+          wind_file  = surf_file = vtk_path
 
           if "_surf" in files[0] :     
                wind_file += files[1]
